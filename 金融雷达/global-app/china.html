@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="中国产业金融雷达 · 童彦彰的金融工具 — 中国产业链、区域经济、A股与人民币市场风险终端" />
+    <title>中国产业金融雷达 · 童彦彰的金融工具</title>
+    <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./china-app.css" />
+  </head>
+  <body>
+    <div class="app-shell" id="app-shell">
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="mobile-menu" type="button" title="切换事件流" aria-label="切换事件流">
+          <span aria-hidden="true">☰</span>
+        </button>
+
+        <div class="topbar-home">
+          <a class="topbar-back" href="index.html" title="返回雷达选择"><span aria-hidden="true">←</span> 返回</a>
+          <div class="brand-lockup" id="brand-home" role="link" tabindex="0" title="返回雷达选择" aria-label="返回雷达选择">
+            <div class="brand-mark">童</div>
+            <div>
+              <strong>童彦彰的金融工具</strong>
+              <span>中国产业金融风险终端</span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="topbar-actions">
+          <div class="period-selector" id="period-selector" aria-label="数据时间范围">
+            <button class="period-button active" data-period="day" type="button">日</button>
+            <button class="period-button" data-period="week" type="button">周</button>
+            <button class="period-button" data-period="month" type="button">月</button>
+          </div>
+          <div class="live-state" id="sync-state" title="数据同步状态">
+            <i></i>
+            <span id="sync-mode">演示数据</span>
+          </div>
+          <div class="updated-at">
+            <span>最近更新</span>
+            <strong id="updated-at">—</strong>
+          </div>
+          <button class="icon-button" id="refresh-data" type="button" title="刷新数据">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </div>
+      </header>
+
+      <aside class="event-rail" id="event-rail">
+        <div class="rail-heading">
+          <div>
+            <span class="eyebrow">CHINA EVENT STREAM</span>
+            <h1>中国事件流</h1>
+          </div>
+          <span class="event-count" id="event-count">0</span>
+        </div>
+
+        <div class="filter-row" id="category-filters" aria-label="事件分类筛选"></div>
+
+        <label class="risk-toggle">
+          <input id="high-risk-only" type="checkbox" />
+          <span></span>
+          仅显示高风险事件
+        </label>
+
+        <div class="event-list" id="event-list" aria-live="polite"></div>
+      </aside>
+
+      <main class="workspace">
+        <section class="risk-overview" aria-label="中国风险总览">
+          <div class="overview-intro">
+            <span class="eyebrow" id="risk-period-label">CHINA RISK PULSE · DEMO</span>
+            <h2 id="risk-overview-title">今日中国产业金融风险总览</h2>
+            <p id="risk-overview-summary">整合进出口态势、区域产业链、A股与人民币市场信号与政策风险。</p>
+          </div>
+          <div class="overview-metric" title="港股科技情绪 = 恒生科技指数当日实时涨跌幅。绿涨红跌，反映港股科技板块冷暖。数据来源：新浪/东财实时行情。">
+            <span>港股科技情绪 <i class="metric-info">ⓘ</i></span>
+            <strong class="status-high" id="m-export">—</strong>
+            <small id="m-export-note">恒生科技实时</small>
+          </div>
+          <div class="overview-metric" title="产业政策风险 = 当前实时政策类快讯的『平均风险分』。系统按关键词给每条政策新闻打分（制裁/管制/关税→高分），再取均值。分越高=政策扰动越强。数据来源：东财等四源实时快讯。">
+            <span>产业政策风险 <i class="metric-info">ⓘ</i></span>
+            <strong class="negative" id="m-policy">—</strong>
+            <small id="m-policy-note">实时政策事件</small>
+          </div>
+          <div class="overview-metric" title="人民币汇率压力 = 50 + (在岸USDCNY − 7.1)×45 + 当日涨跌幅×18（夹在 5~95）。人民币越贬（USDCNY 越高/升越快）压力越大，越强则越低。数据来源：新浪在岸人民币实时。">
+            <span>人民币汇率压力 <i class="metric-info">ⓘ</i></span>
+            <strong id="m-cny">—</strong>
+            <small id="m-cny-note">在岸人民币实时</small>
+          </div>
+          <div class="overview-metric" title="A股市场情绪 = 50 + (上涨指数占比 − 0.5)×60。取上证/深证/创业板/科创50/沪深300/恒生 6 大指数数上涨家数。全涨→80，全跌→20，一半→50 中性。数据来源：东财/新浪实时指数。">
+            <span>A股市场情绪 <i class="metric-info">ⓘ</i></span>
+            <strong class="status-high" id="m-mood">—</strong>
+            <small id="m-mood-note">主要指数综合</small>
+          </div>
+          <div class="overview-opportunity" title="机会信号 = 当前所有实时品种中涨幅最高的一个（实时领涨）。数据来源：14 个实时行情品种。">
+            <span>机会信号 <i class="metric-info">ⓘ</i></span>
+            <strong id="opp-name">—</strong>
+            <small id="opp-note">实时领涨品种</small>
+          </div>
+        </section>
+
+        <section class="map-stage" aria-label="中国产业金融地图">
+          <div class="map-toolbar">
+            <div>
+              <span class="eyebrow">CHINA RISK MAP</span>
+              <h2>中国产业金融风险态势</h2>
+              <p style="margin:4px 0 0;font-size:11.5px;color:var(--faint);line-height:1.55;max-width:560px">省份颜色深浅 = 产业金融活跃度（综合经济体量与资本市场规模，参考值）；<b style="color:var(--muted)">点击任一省份 → 右下角显示该省代表企业实时行情 + 实时快讯</b>。</p>
+            </div>
+            <div class="map-metrics">
+              <div>
+                <span>机会热点</span>
+                <strong id="hot-opp">0</strong>
+              </div>
+              <div>
+                <span>风险热点</span>
+                <strong id="hot-risk">0</strong>
+              </div>
+              <div>
+                <span>出口风险</span>
+                <strong class="status-high">较高</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="map-canvas" id="map-canvas">
+            <div id="cn-leaflet" aria-label="中国省级风险地图"></div>
+            <div class="map-actions">
+              <button class="icon-button" id="map-zoom-in" type="button" title="放大地图">＋</button>
+              <button class="icon-button" id="map-zoom-out" type="button" title="缩小地图">−</button>
+              <button class="icon-button" id="map-reset" type="button" title="重置地图">⌂</button>
+            </div>
+            <div class="map-legend">
+              <span style="color:var(--faint)">产业金融活跃度：</span>
+              <span><i class="critical"></i> 高</span>
+              <span><i class="elevated"></i> 较高</span>
+              <span><i class="guarded"></i> 中</span>
+              <span><i style="background:#6d5c38"></i> 较低</span>
+              <span class="node-legend">机会 / 风险热点</span>
+            </div>
+            <div class="route-snapshot">
+              <span class="eyebrow">PROVINCE FOCUS</span>
+              <div id="cn-focus-body"><strong>上海</strong><span>点击省份查看实时行情与快讯</span></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="insight-rail">
+          <section class="signal-section">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">LIVE DERIVED SIGNALS</span>
+                <h2>实时关键信号</h2>
+              </div>
+              <span class="signal-level">风险偏高</span>
+            </div>
+            <div class="signal-list" id="signal-list"></div>
+          </section>
+
+          <section class="selected-detail">
+            <div class="section-heading compact">
+              <div>
+                <span class="eyebrow">IMPACT CHAIN</span>
+                <h2>影响链</h2>
+              </div>
+            </div>
+            <ol class="impact-chain" id="impact-chain"></ol>
+            <div class="detail-meta">
+              <div><span>可信度</span><strong id="detail-confidence">—</strong></div>
+              <div><span>来源</span><strong id="detail-source">—</strong></div>
+              <div><span>时间</span><strong id="detail-time">—</strong></div>
+            </div>
+          </section>
+
+          <section class="decision-context">
+            <div class="section-heading compact">
+              <div>
+                <span class="eyebrow">WHY IT MATTERS</span>
+                <h2>为什么重要</h2>
+              </div>
+              <span id="detail-horizon">短期 · 关注</span>
+            </div>
+            <p class="why-text" id="why-text"></p>
+            <div class="context-group">
+              <h3>受影响对象</h3>
+              <div class="entity-chips" id="affected-entities"></div>
+            </div>
+            <div class="context-group">
+              <h3>关联市场资产</h3>
+              <div class="asset-links" id="related-assets"></div>
+            </div>
+            <div class="context-group">
+              <button id="cn-analyze-btn" class="cn-analyze-btn" type="button">🔍 AI 分析板块影响</button>
+              <button id="cn-insight-btn" class="cn-analyze-btn" type="button" style="margin-left:6px">💡 博研观点（重庆视角）</button>
+              <div id="cn-analyze-result"></div>
+              <div id="cn-insight-result"></div>
+            </div>
+          </section>
+        </aside>
+
+        <section class="analysis-dock">
+          <div class="dock-tabs" id="dock-tabs" role="tablist"></div>
+          <div class="dock-actions">
+            <span id="dock-status">演示数据</span>
+          </div>
+          <div class="dock-content" id="dock-content"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./vendor/leaflet/leaflet.js"></script>
+    <script src="./china-app.js"></script>
+    <script src="./ai-assistant.js"></script>
+    <script src="./tooltip.js"></script>
+    <script src="./track.js"></script>
+  </body>
+</html>

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="GeoTrade Radar - 全球地缘政治、贸易、供应链与金融市场风险终端"
+    />
+    <title>童彦彰的金融工具</title>
+    <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="./vendor/markercluster/MarkerCluster.css" />
+    <link rel="stylesheet" href="./vendor/markercluster/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+
+    <!-- 登录后：雷达选择界面 -->
+    <div class="radar-select" id="radar-select">
+      <header class="rs-header">
+        <div class="rs-brand">
+          <span class="rs-brand-mark">童</span>
+          <span class="rs-brand-name">
+            <strong>童彦彰的金融工具</strong>
+            <em>Finance Toolkit</em>
+          </span>
+        </div>
+      </header>
+
+      <section class="rs-hero">
+        <div class="rs-sweep" aria-hidden="true">
+          <span class="rs-ring"></span>
+          <span class="rs-ring"></span>
+          <span class="rs-ring"></span>
+          <span class="rs-beam"></span>
+        </div>
+        <span class="rs-eyebrow">SELECT YOUR RADAR</span>
+        <h1>选择你的产业金融雷达</h1>
+        <p style="white-space:nowrap">聚焦产业与金融市场的风险信号，选择下方雷达进入。</p>
+      </section>
+
+      <section class="rs-grid">
+        <button class="rs-card rs-card--active rs-card--wide" data-radar="global" type="button" data-accent="teal">
+          <span class="rs-status rs-status--live"><i></i>实时运行中</span>
+          <span class="rs-ico" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><circle cx="24" cy="24" r="13"/><circle cx="24" cy="24" r="6"/><line class="rs-ico-sweep" x1="24" y1="24" x2="44" y2="24"/><circle class="rs-blip" cx="34" cy="16" r="1.8"/><circle class="rs-blip" cx="16" cy="31" r="1.8"/></svg>
+          </span>
+          <h2>全球产业金融雷达<em>Global Industry &amp; Finance Radar</em></h2>
+          <p>全球产业与金融市场的综合风险态势——实时事件流、可缩放风险地图、市场行情、影响链分析与 AI 简报，一屏掌握全局。</p>
+          <div class="rs-tags">
+            <span>风险地图</span><span>实时事件流</span><span>市场行情</span><span>路线压力</span><span>AI 简报</span>
+          </div>
+          <span class="rs-enter">进入雷达 <b aria-hidden="true">→</b></span>
+        </button>
+
+        <button class="rs-card rs-card--active rs-card--china" data-radar="china" type="button" data-accent="red">
+          <span class="rs-status rs-status--live"><i></i>实时运行中</span>
+          <span class="rs-ico" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><circle cx="24" cy="24" r="13"/><circle cx="24" cy="24" r="6"/><line class="rs-ico-sweep" x1="24" y1="24" x2="44" y2="24"/><circle class="rs-blip" cx="34" cy="16" r="1.8"/><circle class="rs-blip" cx="18" cy="33" r="1.8"/></svg>
+          </span>
+          <h2>中国产业金融雷达<em>China Industry &amp; Finance Radar</em></h2>
+          <p>面向中国产业链与金融市场的情报系统——整合进出口数据、区域产业链、A股与人民币等市场信号与政策风险，发现产业机会与金融风险。</p>
+          <div class="rs-tags">
+            <span>商品机会</span><span>出口市场</span><span>进口依赖</span><span>省市产业</span><span>政策风险</span>
+          </div>
+          <span class="rs-enter">进入雷达 <b aria-hidden="true">→</b></span>
+        </button>
+
+        <button class="rs-card rs-card--active rs-card--chain" data-radar="chain" type="button" data-accent="blue">
+          <span class="rs-status rs-status--live"><i></i>实时运行中</span>
+          <span class="rs-ico" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><circle cx="24" cy="24" r="13"/><circle cx="24" cy="24" r="6"/><line class="rs-ico-sweep" x1="24" y1="24" x2="44" y2="24"/><circle class="rs-blip" cx="33" cy="18" r="1.8"/><circle class="rs-blip" cx="17" cy="30" r="1.8"/></svg>
+          </span>
+          <h2>中国产业链雷达<em>China Industry Chain Radar</em></h2>
+          <p>围绕重庆 33618 现代制造业集群的产业链图谱——按上游→中游→下游细分环节梳理代表 A 股企业，行情实时，一屏看清每条产业链的全貌与冷暖。</p>
+          <div class="rs-tags">
+            <span>产业链图谱</span><span>上下游细分</span><span>代表企业</span><span>实时行情</span><span>33618 集群</span>
+          </div>
+          <span class="rs-enter">进入雷达 <b aria-hidden="true">→</b></span>
+        </button>
+      </section>
+    </div>
+
+    <div class="app-shell" id="app-shell" hidden>
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="mobile-menu" type="button" title="切换事件流">
+          <span aria-hidden="true">☰</span>
+        </button>
+
+        <div class="topbar-home">
+          <button class="topbar-back" id="global-back" type="button" title="返回雷达选择"><span aria-hidden="true">←</span> 返回</button>
+          <div class="brand-lockup" id="brand-home" role="button" tabindex="0" title="返回雷达选择" aria-label="返回雷达选择">
+            <div class="brand-mark">童</div>
+            <div>
+              <strong>童彦彰的金融工具</strong>
+              <span>全球产业金融风险终端</span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="topbar-actions">
+          <div class="period-selector" id="period-selector" aria-label="数据时间范围">
+            <button class="period-button active" data-period="day" type="button">日</button>
+            <button class="period-button" data-period="week" type="button">周</button>
+            <button class="period-button" data-period="month" type="button">月</button>
+          </div>
+          <div class="reading-controls" aria-label="阅读字号">
+            <span>阅读字号</span>
+            <button class="reading-button" id="font-decrease" type="button" title="减小字号">A−</button>
+            <button class="reading-button active" id="font-increase" type="button" title="增大字号">A+</button>
+          </div>
+          <div class="live-state" id="sync-state" title="数据同步状态">
+            <i></i>
+            <span id="sync-mode">正在同步</span>
+          </div>
+          <div class="updated-at">
+            <span>最近更新</span>
+            <strong id="updated-at">14:32 CST</strong>
+          </div>
+          <button class="icon-button" id="refresh-data" type="button" title="刷新数据">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </div>
+      </header>
+
+      <aside class="event-rail" id="event-rail">
+        <div class="rail-heading">
+          <div>
+            <span class="eyebrow">LIVE EVENT STREAM</span>
+            <h1>全球事件流</h1>
+          </div>
+          <span class="event-count" id="event-count">20</span>
+        </div>
+
+        <div class="filter-row" id="category-filters" aria-label="事件分类筛选"></div>
+
+        <label class="risk-toggle">
+          <input id="high-risk-only" type="checkbox" />
+          <span></span>
+          仅显示高风险事件
+        </label>
+
+        <label class="risk-toggle">
+          <input id="my-radar-only" type="checkbox" />
+          <span></span>
+          我的雷达（按我的画像过滤）
+          <button class="icon-button" id="profile-edit-button" type="button" title="设置我的画像" style="margin-left:auto">⚙</button>
+        </label>
+
+        <div class="event-list" id="event-list" aria-live="polite"></div>
+      </aside>
+
+      <main class="workspace">
+        <section class="risk-overview" aria-label="全球风险总览">
+          <div class="overview-intro">
+            <span class="eyebrow" id="risk-period-label">DAILY RISK PULSE</span>
+            <h2 id="risk-overview-title">今日全球风险总览</h2>
+            <p id="risk-overview-summary">正在同步全球事件、市场行情与官方制裁更新。</p>
+            <div class="source-strip" id="data-sources" aria-label="数据来源状态"></div>
+          </div>
+          <div class="overview-metric" title="地缘政治风险 = 当前『能源 / 制裁』类实时事件的平均风险分。系统按关键词给每条事件打分（war/ban/sanction/crisis→高分），再取均值。分越高=地缘扰动越强。数据来源：GDELT / Google News / RSS 实时事件。">
+            <span>地缘政治风险 <i class="metric-info">ⓘ</i></span>
+            <strong class="negative" id="geopolitical-risk">82</strong>
+            <small id="geopolitical-risk-note">高风险事件综合</small>
+          </div>
+          <div class="overview-metric" title="产业政策风险 = 当前『政策 / 制裁管制』类实时事件的平均风险分（关税 / 出口管制类关键词得高分）。分越高=政策扰动越强。数据来源：实时全球事件流。">
+            <span>产业政策风险 <i class="metric-info">ⓘ</i></span>
+            <strong class="negative" id="policy-risk">76</strong>
+            <small id="policy-risk-note">关税 / 出口管制</small>
+          </div>
+          <div class="overview-metric" title="供应链压力 = 当前『航运 / 供应链』类实时事件的平均风险分（红海 / 港口 / 断供类关键词得高分）。分越高=供应链越紧张。数据来源：实时全球事件流。">
+            <span>供应链压力 <i class="metric-info">ⓘ</i></span>
+            <strong class="negative" id="supply-risk">78</strong>
+            <small id="supply-risk-note">航运 / 港口 / 路线</small>
+          </div>
+          <div class="overview-metric" title="市场风险情绪 = 有VIX恐慌指数时按 40+(VIX−12)×3 算；无VIX时按 48 + 各市场当日涨跌幅绝对值之和。分越高=市场越恐慌波动。数据来源：VIX / 全球市场实时行情。">
+            <span>市场风险情绪 <i class="metric-info">ⓘ</i></span>
+            <strong class="status-high" id="market-risk">65</strong>
+            <small id="market-risk-note">行情同步中</small>
+          </div>
+          <div class="overview-opportunity">
+            <span>机会信号</span>
+            <strong>东南亚先进制造</strong>
+            <small>供应链替代 · 机会分 81</small>
+          </div>
+        </section>
+
+        <section class="map-stage" aria-label="全球事件地图">
+          <div class="map-toolbar">
+            <div>
+              <span class="eyebrow">GLOBAL EVENT MAP</span>
+              <h2>全球产业金融风险态势</h2>
+            </div>
+            <div class="map-metrics">
+              <div>
+                <span>高风险事件</span>
+                <strong id="high-risk-count">8</strong>
+              </div>
+              <div>
+                <span>受影响路线</span>
+                <strong>12</strong>
+              </div>
+              <div>
+                <span>市场压力</span>
+                <strong class="status-high">偏高</strong>
+              </div>
+            </div>
+            <div class="map-layer-controls" id="map-layer-controls" aria-label="地图图层">
+              <button class="layer-button active" data-layer="events" type="button">事件 <b>20</b></button>
+              <button class="layer-button active" data-layer="routes" type="button">路线 <b>6</b></button>
+              <button class="layer-button active" data-layer="chokepoints" type="button">海峡 <b>8</b></button>
+              <button class="layer-button" data-layer="ports" type="button">港口 <b>8</b></button>
+              <button class="layer-button" data-layer="industry" type="button">企业动态 <b id="industry-layer-count">0</b></button>
+              <button class="layer-button" data-layer="heatmap" type="button">风险热力图</button>
+            </div>
+          </div>
+
+          <div class="map-canvas" id="map-canvas">
+            <img
+              class="detailed-world-map"
+              src="https://raw.githubusercontent.com/flekschas/simple-world-map/master/world-map.min.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <div id="leaflet-map" aria-label="可缩放全球风险地图"></div>
+            <svg class="world-map" viewBox="0 0 1000 500" aria-hidden="true">
+              <defs>
+                <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                  <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" stroke-width="0.7" />
+                </pattern>
+                <filter id="soft-glow">
+                  <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <rect width="1000" height="500" class="map-grid" fill="url(#grid)" />
+              <g class="continents">
+                <path d="M78 113 L121 76 205 68 263 96 286 133 257 161 226 154 208 185 175 198 148 174 112 168 90 145Z" />
+                <path d="M222 203 L254 220 270 265 259 309 277 343 249 413 224 390 214 333 194 292 198 245Z" />
+                <path d="M449 91 L501 70 548 80 564 109 609 98 647 116 696 112 731 137 790 132 842 159 883 188 856 214 797 201 760 219 713 211 672 188 625 191 591 170 546 175 522 149 476 151 446 128Z" />
+                <path d="M491 181 L542 178 582 211 605 267 582 331 542 386 511 361 501 309 473 269 466 219Z" />
+                <path d="M801 323 L850 307 903 334 916 372 880 398 830 389 796 358Z" />
+                <path d="M390 116 L414 103 432 113 423 133 399 139Z" />
+                <path d="M906 212 L924 221 918 244 903 237Z" />
+              </g>
+              <g class="country-lines">
+                <path d="M112 108 L151 126 173 116 205 137 250 132" />
+                <path d="M128 164 L154 143 205 151 230 178" />
+                <path d="M205 221 L240 247 221 279 264 300" />
+                <path d="M218 319 L256 344 M229 373 L260 389" />
+                <path d="M477 121 L518 112 545 131 570 111 600 132 640 118" />
+                <path d="M528 174 L540 210 575 226 591 255" />
+                <path d="M492 235 L536 250 568 239 602 273" />
+                <path d="M513 296 L552 283 585 309 M533 341 L566 353" />
+                <path d="M619 141 L650 166 684 150 712 176 750 166 790 193 826 186" />
+                <path d="M643 188 L682 204 710 195 744 219 780 211 818 235" />
+                <path d="M705 229 L742 248 775 237 806 263" />
+                <path d="M809 334 L848 351 878 337 M826 379 L866 365 898 381" />
+              </g>
+              <g class="route-lines" filter="url(#soft-glow)">
+                <path d="M760 205 Q625 125 500 205" />
+                <path d="M755 214 Q650 280 570 247" />
+                <path d="M735 226 Q835 280 876 350" />
+                <path d="M720 211 Q490 300 245 185" />
+              </g>
+              <g class="map-labels">
+                <text x="160" y="135">NORTH AMERICA</text>
+                <text x="220" y="300">SOUTH AMERICA</text>
+                <text x="515" y="125">EUROPE</text>
+                <text x="520" y="265">AFRICA</text>
+                <text x="725" y="160">ASIA</text>
+                <text x="835" y="360">OCEANIA</text>
+                <text x="576" y="198">SUEZ</text>
+                <text x="642" y="209">HORMUZ</text>
+                <text x="750" y="247">MALACCA</text>
+                <text x="200" y="222">PANAMA</text>
+              </g>
+            </svg>
+
+            <div class="map-markers" id="map-markers"></div>
+
+            <div class="map-actions">
+              <button class="icon-button" id="map-zoom-in" type="button" title="放大地图">＋</button>
+              <button class="icon-button" id="map-zoom-out" type="button" title="缩小地图">−</button>
+              <button class="icon-button" id="map-reset" type="button" title="重置地图">⌂</button>
+            </div>
+
+            <div class="map-legend">
+              <span><i class="critical"></i> 严重</span>
+              <span><i class="elevated"></i> 偏高</span>
+              <span><i class="guarded"></i> 关注</span>
+              <span class="route-legend">产业链路线压力</span>
+              <span class="node-legend">关键海峡 / 港口</span>
+              <span class="sanction-legend">制裁实体（按国家投射）</span>
+              <span class="industry-legend">企业 / 产业动态</span>
+              <span class="heatmap-legend">区域风险热力（按事件密度 / 强度）</span>
+            </div>
+
+            <div class="route-snapshot">
+              <span class="eyebrow">ROUTE PRESSURE</span>
+              <div><strong>88</strong><span>中国—欧洲海运</span><b class="negative">+18% 成本</b></div>
+              <div><strong>86</strong><span>波斯湾—东亚能源</span><b class="negative">+9% 保险</b></div>
+              <div><strong>79</strong><span>黑海—地中海粮食</span><b class="negative">+7% 运费</b></div>
+            </div>
+
+            <div class="map-focus" id="map-focus">
+              <div class="focus-score">
+                <span>影响分</span>
+                <strong id="focus-score">88</strong>
+              </div>
+              <div>
+                <span class="focus-category" id="focus-category">供应链</span>
+                <h3 id="focus-title">红海航运风险再度上升</h3>
+                <p class="focus-original" id="focus-original" lang="und" hidden></p>
+                <p id="focus-summary">多家承运商延长绕行计划，亚洲至欧洲航线成本与保险溢价同步上升。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="insight-rail">
+          <section class="signal-section">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">LIVE DERIVED SIGNALS</span>
+                <h2>实时关键信号</h2>
+              </div>
+              <span class="signal-level">风险偏高</span>
+            </div>
+            <div class="signal-list">
+              <div class="signal-row">
+                <span>航运压力指数</span>
+                <strong id="shipping-pressure">78</strong>
+                <b class="negative" id="shipping-pressure-note">5 条事件</b>
+              </div>
+              <div class="signal-row">
+                <span>政策不确定性</span>
+                <strong id="policy-uncertainty">71</strong>
+                <b class="negative" id="policy-uncertainty-note">8 条事件</b>
+              </div>
+              <div class="signal-row">
+                <span>市场风险情绪</span>
+                <strong id="market-sentiment">65</strong>
+                <b class="positive" id="market-sentiment-note">9 项行情</b>
+              </div>
+            </div>
+          </section>
+
+          <section class="selected-detail">
+            <div class="section-heading compact">
+              <div>
+                <span class="eyebrow">IMPACT CHAIN</span>
+                <h2>影响链</h2>
+              </div>
+            </div>
+            <ol class="impact-chain" id="impact-chain"></ol>
+            <div class="detail-meta">
+              <div>
+                <span>可信度</span>
+                <strong id="detail-confidence">86%</strong>
+              </div>
+              <div>
+                <span>来源</span>
+                <strong id="detail-source">Lloyd's List</strong>
+              </div>
+              <div>
+                <span>发布时间</span>
+                <strong id="detail-time">18 分钟前</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="decision-context">
+            <div class="section-heading compact">
+              <div>
+                <span class="eyebrow">WHY IT MATTERS</span>
+                <h2>为什么重要</h2>
+              </div>
+              <span id="detail-horizon">短期 · 成本上行</span>
+            </div>
+            <p class="why-text" id="why-text"></p>
+            <div class="context-group">
+              <h3>受影响对象</h3>
+              <div class="entity-chips" id="affected-entities"></div>
+            </div>
+            <div class="context-group">
+              <h3>关联市场资产</h3>
+              <div class="asset-links" id="related-assets"></div>
+            </div>
+            <div class="context-group">
+              <h3>后续跟踪指标</h3>
+              <ul class="indicator-list" id="watch-indicators"></ul>
+            </div>
+            <div class="context-group">
+              <button id="g-analyze-btn" class="cn-analyze-btn" type="button">🔍 AI 分析板块影响</button>
+              <div id="g-analyze-result"></div>
+            </div>
+          </section>
+
+          <section class="country-risk">
+            <div class="section-heading compact">
+              <div>
+                <span class="eyebrow">REFERENCE RISK MODEL</span>
+                <h2>参考国家风险</h2>
+              </div>
+              <span>综合分</span>
+            </div>
+            <div id="country-risk-list"></div>
+          </section>
+        </aside>
+
+        <section class="analysis-dock">
+          <div class="dock-tabs" id="dock-tabs" role="tablist"></div>
+          <div class="dock-actions">
+            <span id="dock-status">模拟数据 · 2 分钟前</span>
+            <button class="icon-button" id="expand-dock" type="button" title="展开面板">↗</button>
+          </div>
+          <div class="dock-content" id="dock-content"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+
+    <script src="./vendor/leaflet/leaflet.js"></script>
+    <script src="./vendor/markercluster/leaflet.markercluster.js"></script>
+    <script src="./vendor/leaflet-heat.js"></script>
+    <div class="modal-overlay" id="profile-modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+        <button class="icon-button modal-close" id="profile-modal-close" type="button" title="关闭">✕</button>
+        <h2 id="profile-modal-title">我的画像</h2>
+        <p class="modal-subtitle">填写后，勾选“我的雷达”即可只看与你业务相关的事件。多个值用中文或英文逗号分隔。</p>
+        <form id="profile-form" class="modal-form">
+          <label>
+            品类关键词（如：锂电池, 光伏, 家具）
+            <input type="text" id="profile-hs" placeholder="锂电池, 光伏" />
+          </label>
+          <label>
+            主要出口市场（如：美国, 欧盟, 东南亚）
+            <input type="text" id="profile-countries" placeholder="美国, 欧盟" />
+          </label>
+          <label>
+            关注航线（如：红海, 亚洲—欧洲, 太平洋）
+            <input type="text" id="profile-routes" placeholder="红海, 亚洲—欧洲" />
+          </label>
+          <label>
+            企业微信预警机器人 Webhook（选填）
+            <input type="url" id="profile-webhook" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..." />
+          </label>
+          <label class="risk-toggle">
+            <input type="checkbox" id="profile-email-alerts" />
+            <span></span>
+            同时发送邮件预警到我的注册邮箱
+          </label>
+          <p class="modal-error" id="profile-error" hidden></p>
+          <button class="modal-submit" id="profile-save" type="submit">保存画像</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+    <script src="./upgrade.js"></script>
+    <script src="./live-data.js"></script>
+    <script src="./account.js"></script>
+    <script src="./profile.js"></script>
+    <script src="./ai-assistant.js"></script>
+    <script src="./tooltip.js"></script>
+    <script src="./track.js"></script>
+  </body>
+</html>

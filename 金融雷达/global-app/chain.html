@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="中国产业链雷达 · 童彦彰的金融工具 — 33618 现代制造业集群产业链图谱，上游→中游→下游代表企业实时行情" />
+    <title>中国产业链雷达 · 童彦彰的金融工具</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./chain-radar.css" />
+  </head>
+  <body>
+    <div class="cr-shell">
+      <header class="topbar">
+        <div class="cr-topleft">
+          <a class="cr-back" href="index.html" title="返回雷达选择">
+            <span aria-hidden="true">←</span> 返回
+          </a>
+          <div class="brand-lockup" id="cr-brand" role="link" tabindex="0" title="返回雷达选择" aria-label="返回雷达选择">
+            <div class="brand-mark">童</div>
+            <div>
+              <strong>童彦彰的金融工具</strong>
+              <span>中国产业链雷达</span>
+            </div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="live-state" id="cr-state" title="数据同步状态">
+            <i></i>
+            <span id="cr-mode">正在同步</span>
+          </div>
+          <div class="updated-at">
+            <span>最近更新</span>
+            <strong id="cr-updated">—</strong>
+          </div>
+          <button class="icon-button" id="cr-refresh" type="button" title="刷新行情">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </div>
+      </header>
+
+      <aside class="cr-side" id="cr-side" aria-label="产业链选择"></aside>
+
+      <main class="cr-main" id="cr-main"></main>
+    </div>
+
+    <div class="cr-intel-backdrop" id="cr-intel-backdrop" hidden></div>
+    <aside class="cr-intel" id="cr-intel" aria-label="赛道情报" hidden>
+      <div class="cr-intel-head">
+        <div>
+          <span class="eyebrow" id="cr-intel-loc"></span>
+          <h2 id="cr-intel-title"></h2>
+        </div>
+        <button class="icon-button" id="cr-intel-close" type="button" title="关闭">✕</button>
+      </div>
+      <div class="cr-intel-body" id="cr-intel-body"></div>
+    </aside>
+
+    <script src="./chain-radar.js"></script>
+    <script src="./track.js"></script>
+  </body>
+</html>

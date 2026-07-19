@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="中国金融雷达 China Finance Radar — A股、人民币、境内债市与省域金融风险监测" />
+    <title>中国金融雷达 · China Finance Radar</title>
+    <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="./finance.css" />
+  </head>
+  <body class="china">
+    <header class="fr-top">
+      <a class="fr-brand" href="./index.html">
+        <span class="fr-mark">华</span>
+        <span class="fr-brand-name"><strong>中国金融雷达</strong><em>China Finance Radar</em></span>
+      </a>
+      <a class="fr-back fr-nav-hide" href="./index.html" title="返回雷达选择">
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        全部雷达
+      </a>
+      <div class="fr-top-right">
+        <div class="fr-status"><i></i><span>行情状态：<b id="fr-mode">同步中</b></span></div>
+        <span class="fr-updated" id="fr-updated">同步中…</span>
+        <button class="fr-refresh" id="fr-refresh" type="button">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15.9 9h-2.06A6 6 0 1 1 12.2 3.8L9.5 6.5H16V0l-2.35 2.35z"/></svg>
+          刷新
+        </button>
+      </div>
+    </header>
+
+    <div class="fr-wrap">
+      <div class="fr-hero">
+        <h1>中国金融市场风险总览</h1>
+        <p>以中国省级地图为核心，聚焦 A 股主要指数、人民币汇率、境内债市与货币市场、北向资金，以及各省域金融中心的市场信号与风险态势。</p>
+      </div>
+
+      <div class="fr-tiles" id="fr-tiles"></div>
+
+      <div class="fr-grid">
+        <section class="fr-panel">
+          <div class="fr-panel-head">
+            <h2>中国金融地图</h2>
+            <span class="fr-sub">圆点 = 区域金融中心 · 点击省份查看</span>
+          </div>
+          <div class="fr-panel-body">
+            <div class="fr-map-stage">
+              <div id="cn-map" aria-label="中国金融态势地图"></div>
+            </div>
+            <div class="fr-map-legend">
+              <span><i style="background:#e5564a"></i>金融中心</span>
+              <span><i style="background:var(--amber)"></i>区域枢纽</span>
+              <span><i style="background:var(--teal)"></i>新兴节点</span>
+            </div>
+            <div class="fr-focus" id="fr-focus" hidden></div>
+          </div>
+        </section>
+
+        <section class="fr-panel">
+          <div class="fr-panel-head">
+            <h2>境内实时行情</h2>
+            <span class="fr-sub" id="fr-count">—</span>
+          </div>
+          <div class="fr-panel-body">
+            <div class="fr-market-grid" id="fr-markets"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="fr-section-title">市场信号 · Market Signals</div>
+      <div class="fr-grid">
+        <section class="fr-panel">
+          <div class="fr-panel-head"><h2>省域金融体量</h2><span class="fr-sub">A股上市公司数量占比（示意）</span></div>
+          <div class="fr-panel-body"><div class="fr-bars" id="fr-breadth"></div></div>
+        </section>
+        <section class="fr-panel">
+          <div class="fr-panel-head"><h2>今日关键信号</h2><span class="fr-sub">派生自当前行情</span></div>
+          <div class="fr-panel-body"><div class="fr-signals" id="fr-signal-list"></div></div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="fr-footer">
+      <span>中国金融雷达 · China Finance Radar</span>
+      <span>演示数据用于展示情报结构 · 省界 © DataV.GeoAtlas · © 2026</span>
+    </footer>
+
+    <div class="fr-toast" id="fr-toast" role="status" aria-live="polite"></div>
+
+    <script src="./vendor/leaflet/leaflet.js"></script>
+    <script src="./china.js"></script>
+  </body>
+</html>

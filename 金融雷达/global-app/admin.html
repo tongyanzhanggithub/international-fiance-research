@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>访客分析后台 · 童彦彰的金融工具</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      body { overflow: auto; }
+      .ad-wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
+      .ad-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+      .ad-top h1 { margin: 0; font-size: 20px; color: var(--text); }
+      .ad-top .eyebrow { color: var(--teal); letter-spacing: 1.4px; }
+      .ad-actions { display: flex; align-items: center; gap: 10px; }
+      .ad-actions button, .ad-gate button { cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 7px; padding: 7px 13px; font-size: 12.5px; }
+      .ad-actions button:hover { border-color: var(--teal); }
+      #ad-updated { font-size: 11px; color: var(--faint); }
+
+      .ad-gate { max-width: 380px; margin: 80px auto; padding: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+      .ad-gate h2 { margin: 0 0 6px; font-size: 17px; color: var(--text); }
+      .ad-gate p { margin: 0 0 16px; font-size: 12px; color: var(--faint); line-height: 1.6; }
+      .ad-gate input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--text); font-size: 13px; margin-bottom: 12px; }
+      .ad-gate button { width: 100%; background: var(--teal); color: #06201b; border: 0; font-weight: 600; padding: 10px; }
+      .ad-err { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 16px; }
+
+      .ad-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 22px; }
+      .ad-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: rgba(255,255,255,.015); }
+      .ad-card span { display: block; font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--faint); }
+      .ad-card strong { display: block; margin-top: 6px; font: 700 26px/1 ui-monospace, Consolas, monospace; color: var(--text); }
+      .ad-card small { display: block; margin-top: 4px; font-size: 10px; color: var(--faint); }
+      .ad-card.live strong { color: var(--teal); }
+
+      .ad-grid2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-bottom: 22px; }
+      .ad-panel { border: 1px solid var(--line); border-radius: 10px; padding: 15px 16px; background: rgba(255,255,255,.012); }
+      .ad-panel h3 { margin: 0 0 14px; font-size: 13px; color: var(--text); }
+      .ad-panel h3 em { font-style: normal; color: var(--faint); font-size: 11px; font-weight: 400; }
+
+      .ad-trend { display: flex; align-items: flex-end; gap: 3px; height: 150px; }
+      .ad-trend .bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; min-width: 0; }
+      .ad-trend .bar i { display: block; width: 70%; background: linear-gradient(180deg, #58d5bc, #3a8f7e); border-radius: 3px 3px 0 0; min-height: 2px; }
+      .ad-trend .bar b { font-size: 8px; color: var(--faint); font-weight: 400; white-space: nowrap; transform: rotate(-45deg); transform-origin: center; margin-top: 6px; }
+      .ad-trend .bar:hover i { background: var(--teal); }
+
+      .ad-radar-row { display: grid; grid-template-columns: 78px 1fr 60px; align-items: center; gap: 10px; margin-bottom: 10px; }
+      .ad-radar-row span:first-child { font-size: 12px; color: var(--muted); }
+      .ad-radar-bar { height: 10px; border-radius: 5px; background: rgba(255,255,255,.05); overflow: hidden; }
+      .ad-radar-bar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #6fb7e8, #58d5bc); }
+      .ad-radar-row span:last-child { font: 600 11px/1 ui-monospace, Consolas, monospace; color: var(--teal); text-align: right; }
+
+      .ad-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+      table.ad-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 720px; }
+      .ad-table th { text-align: left; padding: 10px 12px; font-size: 10px; letter-spacing: .3px; text-transform: uppercase; color: var(--faint); border-bottom: 1px solid var(--line); background: rgba(255,255,255,.02); white-space: nowrap; }
+      .ad-table td { padding: 9px 12px; border-bottom: 1px solid var(--line-soft, #22292a); color: var(--text); white-space: nowrap; }
+      .ad-table tr:hover td { background: rgba(255,255,255,.015); }
+      .ad-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4a5450; margin-right: 6px; }
+      .ad-dot.on { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+      .ad-nick { cursor: pointer; border-bottom: 1px dashed var(--line); }
+      .ad-nick:hover { color: var(--teal); border-color: var(--teal); }
+      .ad-vid { font: 11px ui-monospace, Consolas, monospace; color: var(--faint); }
+      .ad-num { font: 600 12px ui-monospace, Consolas, monospace; }
+      .ad-radartag { font-size: 10px; color: var(--muted); }
+      .ad-hidden { display: none !important; }
+
+      .ad-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 22px; }
+      .ad-hours { display: flex; align-items: flex-end; gap: 2px; height: 90px; }
+      .ad-hours .hb { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }
+      .ad-hours .hb i { display: block; width: 100%; background: linear-gradient(180deg, #6fb7e8, #3a6f8f); border-radius: 2px 2px 0 0; min-height: 1px; }
+      .ad-hours .hb b { font-size: 7px; color: var(--faint); font-weight: 400; }
+      .ad-hours .hb:hover i { background: var(--teal); }
+      .ad-seg { display: flex; height: 26px; border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+      .ad-seg > div { display: flex; align-items: center; justify-content: center; font-size: 10px; color: #06201b; font-weight: 600; min-width: 2px; }
+      .ad-legend { display: flex; flex-direction: column; gap: 7px; }
+      .ad-legend > div { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+      .ad-legend i { width: 10px; height: 10px; border-radius: 2px; }
+      .ad-legend b { margin-left: auto; font: 600 12px ui-monospace, Consolas, monospace; color: var(--text); }
+      .ad-dev-icon { font-size: 12px; }
+
+      /* 系统管理视图 */
+      .ad-nav { display: flex; gap: 8px; margin-bottom: 18px; }
+      .ad-nav-btn { cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 8px; padding: 8px 16px; font-size: 13px; }
+      .ad-nav-btn:hover { border-color: var(--teal); color: var(--text); }
+      .ad-nav-btn.active { background: var(--teal); color: #06201b; border-color: var(--teal); font-weight: 600; }
+      .ad-field { margin-bottom: 14px; }
+      .ad-field label { display: block; font-size: 11px; color: var(--faint); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .3px; }
+      .ad-field input, .ad-field select { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--text); font-size: 13px; }
+      .ad-keystate { font-size: 12px; margin-bottom: 8px; color: var(--muted); }
+      .ad-keystate b { font-family: ui-monospace, Consolas, monospace; color: var(--text); }
+      .ad-hint { font-size: 11px; color: var(--faint); margin-top: 6px; line-height: 1.55; }
+      .ad-hint a { color: var(--teal); }
+      .ad-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+      .ad-btn-row button { cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 7px; padding: 8px 14px; font-size: 12.5px; }
+      .ad-btn-row button:hover { border-color: var(--teal); }
+      .ad-btn-row .ad-primary { background: var(--teal); color: #06201b; border: 0; font-weight: 600; }
+      .ad-btn-row .ad-danger { color: var(--red); border-color: var(--red); }
+      .ad-result { font-size: 12px; margin-top: 10px; min-height: 16px; line-height: 1.5; }
+      .ad-result.ok { color: var(--teal); }
+      .ad-result.err { color: var(--red); }
+      .ad-feat { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--line-soft, #22292a); font-size: 13px; color: var(--text); }
+      .ad-switch { position: relative; width: 40px; height: 22px; border-radius: 11px; background: #3a4440; cursor: pointer; transition: background .15s; flex: none; }
+      .ad-switch.on { background: var(--teal); }
+      .ad-switch i { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left .15s; }
+      .ad-switch.on i { left: 20px; }
+      .ad-usage { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .ad-usage > div { border: 1px solid var(--line); border-radius: 8px; padding: 10px; text-align: center; }
+      .ad-usage span { display: block; font-size: 10px; color: var(--faint); text-transform: uppercase; }
+      .ad-usage strong { display: block; font: 700 20px/1.2 ui-monospace, Consolas, monospace; margin-top: 4px; }
+      .ad-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+      .ad-badge.ok { background: rgba(88,213,188,.15); color: var(--teal); }
+      .ad-badge.err { background: rgba(230,90,90,.15); color: var(--red); }
+      .ad-mini { cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 6px; padding: 4px 10px; font-size: 11px; }
+      .ad-mini:hover { border-color: var(--teal); color: var(--teal); }
+      /* 新闻存档 */
+      .ad-arch-stat { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+      .ad-arch-stat b { color: var(--teal); font-family: ui-monospace, Consolas, monospace; }
+      .ad-arch-ctl { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      .ad-arch-ctl input, .ad-arch-ctl select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--text); font-size: 12.5px; }
+      .ad-arch-ctl #arch-q { flex: 1; min-width: 200px; }
+      .ad-arch-ctl button { cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 7px; padding: 7px 13px; font-size: 12.5px; }
+      .ad-arch-ctl button:hover { border-color: var(--teal); }
+      .ad-arch-ctl .ad-danger { color: var(--red); border-color: var(--red); }
+      .ad-arch-trend { display: flex; align-items: flex-end; gap: 3px; height: 80px; padding: 8px 2px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 8px; }
+      .ad-arch-trend .b { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; }
+      .ad-arch-trend .b i { display: block; width: 68%; background: linear-gradient(180deg, #6fb7e8, #3a6f8f); border-radius: 2px 2px 0 0; min-height: 1px; }
+      .ad-arch-trend .b b { font-size: 7px; color: var(--faint); font-weight: 400; white-space: nowrap; }
+      .ad-arch-trend .b span { font-size: 8px; color: var(--muted); }
+      #arch-table td a { color: #cfe0db; text-decoration: none; }
+      #arch-table td a:hover { color: var(--teal); }
+      .arch-kind { font-size: 10px; padding: 1px 6px; border-radius: 5px; }
+      .arch-kind.news { background: rgba(88,213,188,.15); color: var(--teal); }
+      .arch-kind.search { background: rgba(111,183,232,.15); color: #6fb7e8; }
+      @media (max-width: 980px) { .ad-cards { grid-template-columns: repeat(3, 1fr); } .ad-grid3 { grid-template-columns: 1fr; } }
+      @media (max-width: 820px) {
+        .ad-cards { grid-template-columns: repeat(2, 1fr); }
+        .ad-grid2 { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ad-gate" id="ad-gate">
+      <h2>访客分析后台</h2>
+      <p>请输入管理口令（服务器 <code>ADMIN_TOKEN</code>）。口令仅存于本次浏览器会话。</p>
+      <input id="ad-token" type="password" placeholder="管理口令" autocomplete="off" />
+      <button id="ad-enter" type="button">进入后台</button>
+      <div class="ad-err" id="ad-gate-err"></div>
+    </div>
+
+    <div class="ad-wrap ad-hidden" id="ad-main">
+      <div class="ad-top">
+        <div>
+          <span class="eyebrow">VISITOR ANALYTICS</span>
+          <h1>访客分析后台 · 童彦彰的金融工具</h1>
+        </div>
+        <div class="ad-actions">
+          <span id="ad-updated">—</span>
+          <button id="ad-refresh" type="button">↻ 刷新</button>
+          <button id="ad-logout" type="button">退出</button>
+        </div>
+      </div>
+
+      <div class="ad-nav" id="ad-nav">
+        <button class="ad-nav-btn active" data-view="analytics" type="button">访客分析</button>
+        <button class="ad-nav-btn" data-view="system" type="button">系统管理</button>
+      </div>
+
+      <div id="ad-view-analytics">
+      <div class="ad-cards" id="ad-cards"></div>
+
+      <div class="ad-grid2">
+        <div class="ad-panel">
+          <h3>访问趋势 <em>· 近 30 天（柱高 = 当日观看分钟）</em></h3>
+          <div class="ad-trend" id="ad-trend"></div>
+        </div>
+        <div class="ad-panel">
+          <h3>雷达偏好 <em>· 累计观看分钟</em></h3>
+          <div id="ad-radar"></div>
+        </div>
+      </div>
+
+      <div class="ad-grid3">
+        <div class="ad-panel">
+          <h3>设备类型 <em>· 桌面 / 手机 / 平板</em></h3>
+          <div class="ad-seg" id="ad-dev-seg"></div>
+          <div class="ad-legend" id="ad-dev-legend"></div>
+        </div>
+        <div class="ad-panel">
+          <h3>访问时段 <em>· 0-23 时观看分钟</em></h3>
+          <div class="ad-hours" id="ad-hours"></div>
+        </div>
+        <div class="ad-panel">
+          <h3>访客粘性 <em>· 按活跃天数分层</em></h3>
+          <div class="ad-legend" id="ad-retention"></div>
+        </div>
+      </div>
+
+      <div class="ad-panel" style="margin-bottom:14px">
+        <h3>访客明细 <em>· 点昵称可命名，方便认人</em></h3>
+      </div>
+      <div class="ad-table-wrap">
+        <table class="ad-table">
+          <thead>
+            <tr>
+              <th>访客</th><th>设备</th><th>设备 ID</th><th>累计时长</th><th>今日</th><th>活跃天</th>
+              <th>全球</th><th>中国</th><th>产业链</th><th>最近访问</th>
+            </tr>
+          </thead>
+          <tbody id="ad-tbody"></tbody>
+        </table>
+      </div>
+      </div><!-- /ad-view-analytics -->
+
+      <div id="ad-view-system" class="ad-hidden">
+        <div class="ad-grid2">
+          <div class="ad-panel">
+            <h3>AI 配置 <em>· DeepSeek Key / 模型（保存后立即生效）</em></h3>
+            <div class="ad-field">
+              <label>API Key</label>
+              <div class="ad-keystate" id="cfg-keystate">—</div>
+              <input id="cfg-key" type="password" placeholder="粘贴新的 DeepSeek API Key（留空＝不改动）" autocomplete="off" />
+              <div class="ad-hint">来源：<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a> · 只保存在本服务器 <code id="cfg-file">radar-config.json</code>，页面永不回显明文。</div>
+            </div>
+            <div class="ad-field">
+              <label>模型</label>
+              <select id="cfg-model">
+                <option value="deepseek-chat">deepseek-chat（通用，快）</option>
+                <option value="deepseek-reasoner">deepseek-reasoner（推理，慢）</option>
+              </select>
+            </div>
+            <div class="ad-btn-row">
+              <button id="cfg-save" class="ad-primary" type="button">保存配置</button>
+              <button id="cfg-test" type="button">测试连通</button>
+              <button id="cfg-clear" class="ad-danger" type="button">清除 Key</button>
+            </div>
+            <div class="ad-result" id="cfg-result"></div>
+          </div>
+
+          <div class="ad-panel">
+            <h3>功能开关 <em>· 关掉即回退模板/不调用 AI</em></h3>
+            <div id="cfg-features"></div>
+            <h3 style="margin-top:18px">AI 用量 <em>· 本次运行累计</em></h3>
+            <div class="ad-usage" id="ai-usage"></div>
+          </div>
+        </div>
+
+        <div class="ad-panel" style="margin-bottom:16px">
+          <h3>数据源健康 <em>· 实时抓取成功率与最后状态</em></h3>
+          <div class="ad-table-wrap" style="border:0">
+            <table class="ad-table" id="src-table">
+              <thead><tr><th>数据源</th><th>状态</th><th>成功率</th><th>成功/失败</th><th>缓存年龄</th><th>耗时</th><th>最后成功</th><th>最后错误</th></tr></thead>
+              <tbody id="src-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ad-panel">
+          <h3>缓存管理 <em>· 强制刷新可让下一次请求拉最新</em></h3>
+          <div class="ad-btn-row" style="margin-bottom:12px">
+            <button id="cache-refresh" type="button">↻ 查看</button>
+            <button id="cache-clear-all" class="ad-danger" type="button">清空全部缓存</button>
+          </div>
+          <div class="ad-table-wrap" style="border:0">
+            <table class="ad-table" id="cache-table">
+              <thead><tr><th>缓存项</th><th>年龄</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody id="cache-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ad-panel" style="margin-bottom:16px">
+          <h3>新闻存档 <em>· 实时快讯留痕，按天回看 / 按公司·赛道查历史</em></h3>
+          <div class="ad-arch-stat" id="arch-stat">—</div>
+          <div class="ad-arch-ctl">
+            <input id="arch-q" type="text" placeholder="搜公司 / 赛道 / 关键字，如「宇树」「融资」" />
+            <input id="arch-day" type="date" title="按入库日期筛选" />
+            <select id="arch-kind">
+              <option value="">全部来源</option>
+              <option value="news">事件流快讯</option>
+              <option value="search">定向搜索</option>
+            </select>
+            <button id="arch-search" type="button">查询</button>
+            <button id="arch-trend-btn" type="button">看提及趋势</button>
+            <button id="arch-prune" class="ad-danger" type="button" title="删除 180 天前的记录">裁剪旧档</button>
+          </div>
+          <div class="ad-arch-trend ad-hidden" id="arch-trend"></div>
+          <div class="ad-table-wrap" style="border:0;max-height:360px;overflow:auto">
+            <table class="ad-table" id="arch-table">
+              <thead><tr><th>标题</th><th>来源</th><th>类型</th><th>入库时间</th></tr></thead>
+              <tbody id="arch-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <h3 style="margin:22px 0 10px;font-size:13px;color:var(--text)">AI 调用日志 <em style="font-style:normal;color:var(--faint);font-size:11px;font-weight:400">· 最近 60 条</em></h3>
+        <div class="ad-table-wrap">
+          <table class="ad-table" id="log-table">
+            <thead><tr><th>时间</th><th>功能</th><th>结果</th><th>耗时</th><th>错误</th></tr></thead>
+            <tbody id="log-tbody"></tbody>
+          </table>
+        </div>
+      </div><!-- /ad-view-system -->
+    </div>
+
+    <script src="./admin.js"></script>
+  </body>
+</html>

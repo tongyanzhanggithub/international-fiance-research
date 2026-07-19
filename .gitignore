@@ -1,0 +1,36 @@
+# ============ 严禁提交：真实用户数据与密钥 ============
+# 账号库（含用户邮箱与密码哈希）
+users.db
+users.db-journal
+users.db-wal
+users.db-shm
+
+# 运行时配置：含明文 DeepSeek API Key
+radar-config.json
+
+# 本地备份（含真实用户数据）
+*.bak
+*.bak-*
+*.db.bak-*
+
+# ============ 运行时生成、可再生，无需入库 ============
+# 新闻归档缓存库
+news.db
+news.db-journal
+news.db-wal
+news.db-shm
+
+# 标题翻译缓存
+title-translations.json
+
+# ============ 依赖与本地工具 ============
+node_modules/
+.claude/
+
+# ============ 系统文件 ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 开发截图（体积大，不入库；本地保留）
+artifacts/

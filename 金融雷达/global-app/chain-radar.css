@@ -1,0 +1,276 @@
+/* ===== 产业链雷达 · 独立页面布局 ===== */
+.cr-shell {
+  height: 100vh; /* 固定视口高：body 是 overflow:hidden，必须让 cr-main 自己滚动 */
+  display: grid;
+  /* minmax(0,1fr)：允许主列在 shell 收窄（情报面板停靠）时真正压缩，
+     否则 1fr 的隐含最小值是 min-content，内容会横向溢出到面板下方。 */
+  grid-template-columns: 268px minmax(0, 1fr);
+  grid-template-rows: 60px minmax(0, 1fr);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    var(--bg);
+  background-size: 100% 34px, 34px 100%, auto;
+}
+/* 顶栏改 flex：styles.css 各断点的 grid-template-columns 是为「☰+品牌+搜索」设计的，
+   本页没有这些元素，沿用会把品牌挤进 36px 小格 */
+.cr-shell > .topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 16px;
+}
+.cr-topleft { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.cr-back {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border: 1px solid var(--line); border-radius: 8px;
+  color: var(--muted); text-decoration: none; font-size: 13px; white-space: nowrap;
+  transition: color 120ms, border-color 120ms, background 120ms;
+}
+.cr-back:hover { color: var(--teal); border-color: var(--teal); background: rgba(88, 213, 188, 0.08); }
+.cr-back span { font-size: 15px; line-height: 1; }
+@media (max-width: 620px) {
+  .cr-back { padding: 7px 10px; }
+  .cr-topleft .brand-lockup span { display: none; } /* 手机上收起副标题，给返回按钮腾地方 */
+}
+
+/* 左侧产业链选择 */
+.cr-side {
+  grid-row: 2;
+  min-height: 0;
+  border-right: 1px solid var(--line);
+  padding: 14px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.12);
+}
+.cr-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms;
+}
+.cr-pick b { font-size: 13px; font-weight: 600; color: var(--text); }
+.cr-pick small { font-size: 10px; color: var(--faint); }
+.cr-pick:hover { border-color: rgba(111, 183, 232, 0.5); }
+.cr-pick.active { border-color: #6fb7e8; background: rgba(111, 183, 232, 0.1); }
+.cr-pick.active b { color: #9fd0f2; }
+
+/* 右侧主区 */
+.cr-main {
+  grid-row: 2;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 22px 40px;
+}
+
+/* 头部：链名 + 实时统计 */
+.cr-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 15px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.cr-head-title .eyebrow { color: #6fb7e8; letter-spacing: 1.6px; }
+.cr-head-title h1 { margin: 5px 0 6px; font-size: 24px; color: var(--text); }
+.cr-tierbadge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  color: #e8a06f;
+  background: rgba(232, 160, 111, 0.12);
+  border: 1px solid rgba(232, 160, 111, 0.32);
+}
+.cr-head-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.cr-stat {
+  min-width: 92px;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.015);
+}
+.cr-stat > span { display: block; font-size: 9.5px; letter-spacing: 0.4px; color: var(--faint); text-transform: uppercase; }
+.cr-stat > strong { display: block; margin-top: 4px; font: 700 20px/1 ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--text); }
+.cr-stat > strong.up { color: #f0706e; }
+.cr-stat > strong.down { color: #58d5bc; }
+.cr-stat > small { display: block; margin-top: 3px; font-size: 9.5px; color: var(--faint); }
+.cr-stat--lead > strong { font-size: 14px; line-height: 1.3; font-family: inherit; color: #e8a06f; }
+
+/* 上中下游三层 */
+.cr-map { display: flex; flex-direction: column; }
+.cr-layer {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 13px 15px;
+  background: rgba(255, 255, 255, 0.012);
+}
+.cr-layer.cr-up { border-left: 4px solid #6fb7e8; }
+.cr-layer.cr-mid { border-left: 4px solid #e8a06f; }
+.cr-layer.cr-down { border-left: 4px solid #7fd39a; }
+.cr-layer-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 11px; }
+.cr-tier { font-size: 15px; font-weight: 700; color: var(--text); }
+.cr-layer-head small { font-size: 11px; color: var(--faint); }
+.cr-flow { text-align: center; color: var(--faint); font-size: 13px; line-height: 1; padding: 5px 0; }
+
+.cr-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 10px; }
+.cr-group {
+  border: 1px solid var(--line-soft, #22292a);
+  border-radius: 8px;
+  padding: 9px 11px;
+  background: rgba(0, 0, 0, 0.16);
+}
+.cr-sector { display: block; font-size: 11px; color: var(--muted); margin-bottom: 7px; letter-spacing: 0.3px; font-weight: 600; }
+.cr-cos { display: flex; flex-wrap: wrap; gap: 6px; }
+.cr-co {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 11.5px;
+}
+.cr-co b { font-weight: 600; color: var(--text); }
+.cr-co-q { font: 600 10px/1 ui-monospace, Consolas, monospace; color: var(--faint); }
+.cr-co-q em { font-style: normal; }
+.cr-co.up { border-color: rgba(240, 111, 98, 0.42); }
+.cr-co.up .cr-co-q em { color: #f0706e; }
+.cr-co.down { border-color: rgba(88, 213, 188, 0.42); }
+.cr-co.down .cr-co-q em { color: #58d5bc; }
+.cr-co.flat .cr-co-q em { color: var(--faint); }
+.cr-cq {
+  display: inline-grid;
+  place-items: center;
+  width: 15px; height: 15px;
+  border-radius: 3px;
+  background: #e8a06f;
+  color: #0b0e0f;
+  font-size: 9px; font-weight: 700; font-style: normal;
+}
+
+/* 未上市企业：类型徽标（独角兽 / 拟IPO / 港股 / 美股 / 未上市） */
+.cr-co.cr-un { background: rgba(255, 255, 255, 0.028); }
+.cr-co-tag {
+  font: 700 8.5px/1.5 -apple-system, "Microsoft YaHei", sans-serif;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.cr-un.uni { border-color: rgba(168, 130, 240, 0.45); }
+.cr-un.uni .cr-co-tag { color: #c3a6f5; background: rgba(168, 130, 240, 0.16); }
+.cr-un.ipo { border-color: rgba(240, 180, 75, 0.45); }
+.cr-un.ipo .cr-co-tag { color: #f0b44b; background: rgba(240, 180, 75, 0.15); }
+.cr-un.hk { border-color: rgba(111, 183, 232, 0.45); }
+.cr-un.hk .cr-co-tag { color: #6fb7e8; background: rgba(111, 183, 232, 0.15); }
+.cr-un.us { border-color: rgba(130, 150, 240, 0.45); }
+.cr-un.us .cr-co-tag { color: #9aa6f5; background: rgba(130, 150, 240, 0.15); }
+.cr-un.np { border-color: var(--line); }
+.cr-un.np .cr-co-tag { color: var(--muted); background: rgba(255, 255, 255, 0.06); }
+
+/* 头部统计：独角兽计数用紫色 */
+.cr-stat > strong.uni { color: #c3a6f5; }
+
+/* 响应式：小屏改整页滚动（styles.css 的 body overflow:hidden 需在此解除） */
+@media (max-width: 1000px) {
+  body { overflow: auto; }
+  .cr-shell { height: auto; min-height: 100vh; grid-template-columns: 1fr; grid-template-rows: 56px auto auto; }
+  .cr-side {
+    grid-row: 2; grid-column: 1;
+    flex-direction: row; flex-wrap: nowrap;
+    overflow-x: auto; overflow-y: hidden;
+    border-right: 0; border-bottom: 1px solid var(--line);
+    padding: 10px;
+  }
+  .cr-pick { flex: 0 0 auto; min-width: 160px; }
+  .cr-main { grid-row: 3; grid-column: 1; padding: 14px; overflow-y: visible; }
+}
+@media (max-width: 620px) {
+  .cr-head-title h1 { font-size: 19px; }
+  .cr-groups { grid-template-columns: 1fr; }
+  .cr-stat { min-width: 78px; padding: 8px 10px; }
+}
+
+/* ===== 赛道情报面板（点击弹出，右侧抽屉）===== */
+.cr-sector { cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.cr-group { cursor: pointer; transition: border-color 120ms; }
+.cr-group:hover { border-color: rgba(111, 183, 232, 0.4); }
+.cr-intel-cue { font-style: normal; font-size: 9.5px; color: var(--faint); opacity: 0; transition: opacity 120ms; white-space: nowrap; }
+.cr-group:hover .cr-intel-cue { opacity: 1; color: #6fb7e8; }
+.cr-co { cursor: pointer; }
+
+.cr-intel-backdrop {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0, 0, 0, 0.5);
+}
+.cr-intel {
+  position: fixed; top: 0; right: 0; z-index: 61;
+  width: clamp(300px, 34vw, 440px); height: 100vh;
+  display: flex; flex-direction: column;
+  background: var(--surface); border-left: 1px solid var(--line);
+  box-shadow: -18px 0 40px rgba(0, 0, 0, 0.45);
+}
+.cr-intel-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 16px 18px 13px; border-bottom: 1px solid var(--line);
+}
+.cr-intel-head .eyebrow { color: #6fb7e8; letter-spacing: 1.2px; }
+.cr-intel-head h2 { margin: 5px 0 0; font-size: 18px; color: var(--text); }
+.cr-intel-body { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 18px 30px; }
+.cr-intel-sec { font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--muted); text-transform: uppercase; margin: 4px 0 9px; }
+.cr-intel-cos { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+
+.cr-intel-loading, .cr-intel-empty { font-size: 12px; color: var(--faint); padding: 10px 0; }
+.cr-intel-item {
+  display: block; text-decoration: none;
+  padding: 10px 11px; margin-bottom: 7px;
+  border: 1px solid var(--line-soft, #22292a); border-radius: 7px;
+  background: rgba(255, 255, 255, 0.012); transition: border-color 120ms, background 120ms;
+}
+.cr-intel-item:hover { border-color: rgba(111, 183, 232, 0.45); background: rgba(111, 183, 232, 0.05); }
+.cr-intel-it-title { display: block; font-size: 12.5px; line-height: 1.45; color: var(--text); }
+.cr-intel-it-meta { display: block; margin-top: 5px; font-size: 10px; color: var(--faint); }
+.cr-intel-it-meta i { font-style: normal; color: #6fb7e8; }
+
+@media (max-width: 620px) {
+  .cr-intel { width: 100vw; }
+}
+
+/* 情报面板打开时（桌面/笔记本）：新增第三列容纳面板宽度，1fr 主列自动收窄，
+   产业链内容重排到面板左侧、不再被浮层遮挡；去掉遮罩让左侧仍可查看与点击。 */
+/* 情报面板打开时（平板及以上，>620px）：把整个 shell 宽度收窄「面板宽度」，
+   面板固定停靠在右侧空出的等宽区域 → 任意宽度都零重叠、内容自动重排。
+   面板宽度与 shell 收窄量用同一 clamp，二者严格相等。手机(≤620)仍是全屏抽屉。 */
+@media (min-width: 621px) {
+  body.cr-intel-open .cr-shell {
+    /* 用 100%（随 body 内容宽，排除滚动条）而非 100vw，避免竖向滚动条导致的 ~15px 重叠 */
+    width: calc(100% - clamp(300px, 34vw, 440px));
+    transition: width 180ms ease;
+  }
+  body.cr-intel-open .cr-intel-backdrop { display: none !important; }
+}
+
+/* 短屏自适应：宽屏但窗口不够高时，整页可滚动，不再把上中下游图谱硬压进一屏 */
+@media (min-width: 1001px) and (max-height: 940px) {
+  body { overflow-y: auto; overflow-x: hidden; }
+  .cr-shell { height: auto; min-height: 100vh; grid-template-rows: 60px auto; }
+  .cr-main { overflow-y: visible; }
+  .cr-side { align-self: start; position: sticky; top: 60px; max-height: calc(100vh - 60px); overflow-y: auto; }
+}
