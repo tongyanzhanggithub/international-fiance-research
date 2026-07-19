@@ -7,7 +7,7 @@
   "use strict";
   const el = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const scoreColor = (s) => (s >= 80 ? "var(--red)" : s >= 65 ? "#b07615" : "#0f8f7a");
+  const scoreColor = (s) => (s >= 80 ? "var(--red)" : s >= 65 ? "var(--amber)" : "var(--teal)");
   const scoreClass = (s) => (s >= 80 ? "critical" : s >= 65 ? "elevated" : "guarded");
 
   // ---------------- 分类 ----------------
@@ -459,7 +459,7 @@
       `<li data-step="0${i + 1}"><span><strong>${esc(label)}</strong><br />${esc(text)}</span></li>`).join("");
     el("detail-confidence").textContent = `${e.confidence}%`;
     el("detail-source").innerHTML = e.url
-      ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer" style="color:#0f4e91">${esc(e.source)} ↗</a>`
+      ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer" style="color:#e8907f">${esc(e.source)} ↗</a>`
       : esc(e.source);
     el("detail-time").textContent = e.time;
     el("detail-horizon").textContent = e.horizon;
@@ -1076,7 +1076,7 @@
     const heat = PROVINCE_HEAT[prov];
     const coCount = (PROVINCE_COMPANIES[prov] || []).length;
     const stats = [];
-    if (typeof heat === "number") stats.push(`<div><span>产业金融活跃度</span><strong style="color:${heatTextColor(heat)}">${heat}</strong><small>参考</small></div>`);
+    if (typeof heat === "number") stats.push(`<div><span>产业金融活跃度</span><strong style="color:${heatColor(heat)}">${heat}</strong><small>参考</small></div>`);
     if (reg && reg.listed) stats.push(`<div><span>A股上市公司</span><strong>${reg.listed}</strong><small>家 · 示意</small></div>`);
     stats.push(`<div><span>收录代表企业</span><strong>${coCount}</strong><small>家 · 实时行情</small></div>`);
     const searchBtn = `<a class="pd-more" href="https://so.eastmoney.com/news/s?keyword=${encodeURIComponent(prov)}" target="_blank" rel="noreferrer">在东方财富查看「${esc(prov)}」完整资讯 ↗</a>`;
@@ -1152,7 +1152,7 @@
   function renderRegionsTab() {
     const provs = POLICY_PROVINCES.map((p) => p.name).sort((a, b) => (PROVINCE_HEAT[b] || 0) - (PROVINCE_HEAT[a] || 0));
     return `<div class="cn-regions">
-      <div class="cn-regions-head"><b>各省产业与实时资本市场表现 · 全 31 省</b><span>涨跌 = 该省代表企业实时均值（涨红跌绿）；数字徽标为产业金融活跃度（示意参考）。<b style="color:#5b6675">点击任一省 → 代表企业实时行情 + 政策 + 快讯</b>。</span></div>
+      <div class="cn-regions-head"><b>各省产业与实时资本市场表现 · 全 31 省</b><span>涨跌 = 该省代表企业实时均值（涨红跌绿）；数字徽标为产业金融活跃度（示意参考）。<b style="color:var(--muted)">点击任一省 → 代表企业实时行情 + 政策 + 快讯</b>。</span></div>
       <div class="rg-list">
         ${provs.map((prov) => {
           const pol = POLICY_PROVINCES.find((p) => p.name === prov);
@@ -1160,7 +1160,7 @@
           const heat = PROVINCE_HEAT[prov];
           const tail = reg && reg.listed ? `${reg.listed} 家A股` : `${(PROVINCE_COMPANIES[prov] || []).length} 家代表企业`;
           return `<div class="rg-row cq-card" data-prov-detail="${esc(prov)}" title="点击查看 ${esc(prov)} 实时行情详情">
-            <div class="rg-name">${esc(prov)}${typeof heat === "number" ? `<i class="rg-heat" style="color:${heatTextColor(heat)}">${heat}</i>` : ""}</div>
+            <div class="rg-name">${esc(prov)}${typeof heat === "number" ? `<i class="rg-heat" style="color:${heatColor(heat)}">${heat}</i>` : ""}</div>
             <div class="rg-lead">${esc(pol ? pol.lead : (reg ? reg.lead : ""))}</div>
             <div class="rg-live" id="rg-live-${esc(prov)}">${rgLiveHtml(prov)}</div>
             <div class="rg-tail">${tail} <span class="rg-go">›</span></div>
@@ -1226,7 +1226,7 @@
   // AI 简报（DeepSeek 基于四源快讯生成）——复用全球 .brief-layout 样式
   function renderCnBriefTab() {
     loadCnBrief();
-    return `<div id="cn-brief-root" style="padding:16px;color:#5b6675">正在用 DeepSeek 生成 AI 简报…</div>`;
+    return `<div id="cn-brief-root" style="padding:16px;color:var(--muted)">正在用 DeepSeek 生成 AI 简报…</div>`;
   }
   function cnBriefHtml(d) {
     const li = (arr) => (Array.isArray(arr) ? arr : []).map((x) => `<li>${esc(x)}</li>`).join("");
@@ -1299,26 +1299,16 @@
   let cnMap = null, geoLayer = null, selectedLayer = null, geoCache = null;
   const shortName = (f) => f.replace(/(维吾尔自治区|壮族自治区|回族自治区|特别行政区|自治区|省|市)$/, "");
   const heatFor = (f) => { const v = PROVINCE_HEAT[shortName(f)]; return typeof v === "number" ? v : null; };
-  // 产业金融活跃度色阶：单一蓝色系顺序色阶（浅=低 / 深=高），浅色地图可读，且避开红绿（红绿留给行情涨跌）
   function heatColor(h) {
-    if (h == null) return "#e6ebf2";
-    if (h >= 88) return "#0b4a87";
-    if (h >= 74) return "#1668bf";
-    if (h >= 60) return "#4a90d9";
-    if (h >= 48) return "#7fb3e5";
-    if (h >= 36) return "#aecfee";
-    return "#d3e2f4";
+    if (h == null) return "#2a3233";
+    if (h >= 88) return "#e5564a";
+    if (h >= 74) return "#ef7a5f";
+    if (h >= 60) return "#f3934b";
+    if (h >= 48) return "#f3b44b";
+    if (h >= 36) return "#b5893c";
+    return "#6d5c38";
   }
-  function geoStyle(feat) { const h = heatFor(feat.properties.name); return { color: "#93a4b8", weight: 1, fillColor: heatColor(h), fillOpacity: h == null ? 0.45 : 0.85 }; }
-  // 活跃度用作「文字颜色」时的深色版：地图填充色的浅色档在白底上不可读
-  function heatTextColor(h) {
-    if (h == null) return "#8492a3";
-    if (h >= 88) return "#0b4a87";
-    if (h >= 74) return "#1668bf";
-    if (h >= 60) return "#2c6fa8";
-    if (h >= 48) return "#42708f";
-    return "#5b6675";
-  }
+  function geoStyle(feat) { const h = heatFor(feat.properties.name); return { color: "#0b0e0f", weight: 1, fillColor: heatColor(h), fillOpacity: h == null ? 0.3 : 0.82 }; }
   // ---- 省份聚焦：悬停显示静态概览，点击拉取实时行情+实时快讯 ----
   const provStockCache = {}; // sn -> quotes（20s 内复用）
   const provNewsCache = {};  // sn -> items
@@ -1332,7 +1322,7 @@
     const act = PROVINCE_HEAT[sn];
     const rows = [`<strong>${esc(sn)}</strong>`];
     if (r) rows.push(`<span>主导产业：${esc(r.lead)}</span>`);
-    if (typeof act === "number") rows.push(`<span>产业金融活跃度 <b style="color:${heatTextColor(act)}">${act}</b> <i class="cn-focus-ref">参考</i></span>`);
+    if (typeof act === "number") rows.push(`<span>产业金融活跃度 <b style="color:${heatColor(act)}">${act}</b> <i class="cn-focus-ref">参考</i></span>`);
     return rows.join("");
   }
   function stocksHtml(sn) {
@@ -1411,7 +1401,7 @@
       const feat = geo.features.find((f) => shortName(f.properties.name) === h.province);
       const c = feat && (feat.properties.centroid || feat.properties.center);
       if (!c) return;
-      const icon = L.divIcon({ className: "cn-hub-dot", html: `<i style="--c:${h.type === "opp" ? "#0f8f7a" : "#1668bf"}"></i>`, iconSize: [11, 11] });
+      const icon = L.divIcon({ className: "cn-hub-dot", html: `<i style="--c:${h.type === "opp" ? "#58d5bc" : "#e5564a"}"></i>`, iconSize: [11, 11] });
       L.marker([c[1], c[0]], { icon }).addTo(cnMap)
         .bindTooltip(`<b>${esc(h.title)}</b><span>${esc(h.province)} · ${esc(h.note)}</span>`, { className: "cn-hub-tip", direction: "top", offset: [0, -6] });
     });
