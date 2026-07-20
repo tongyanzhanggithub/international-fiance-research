@@ -781,31 +781,44 @@
   }
   // ---------------- 物理AI · 具身智能产业链专区（上市供应商实时行情 + 未上市新锐）----------------
   const PHYS_AI = [
-    { layer: "上游 · 核心零部件", accent: "up", groups: [
+    { layer: "上游 · 感知 · 边缘算力 · 精密执行 · 材料", accent: "up", groups: [
+      { g: "边缘 AI 芯片", cos: [["地平线","港股"],["黑芝麻智能","港股"],["瑞芯微","603893"],["晶晨股份","688099"],["寒武纪","688256"]] },
+      { g: "3D 视觉", cos: [["奥比中光","688322"],["的卢深视","独角兽"]] },
+      { g: "激光雷达", cos: [["禾赛科技","美股"],["速腾聚创","港股"],["炬光科技","688167"]] },
+      { g: "IMU 惯导", cos: [["芯动联科","688582"],["华依科技","688071"]] },
       { g: "灵巧手", cos: [["因时机器人","早期"],["帕西尼感知","明星"],["灵心巧手","早期"],["戴盟机器人","早期"],["兆威机电","003021"],["鸣志电器","603728"]] },
       { g: "触觉 / 力矩传感", cos: [["帕西尼感知","明星"],["钛深科技","早期"],["柯力传感","603662"],["汉威科技","300007"]] },
-      { g: "无框力矩电机", cos: [["步科股份","688160"],["鸣志电器","603728"],["昊志机电","300503"],["伟创电气","688698"]] },
-      { g: "空心杯 / 无刷电机", cos: [["江苏雷利","300660"],["鸣志电器","603728"],["拓邦股份","002139"]] },
-      { g: "谐波 / RV 减速器", cos: [["绿的谐波","688017"],["双环传动","002472"],["中大力德","002896"],["国茂股份","603915"]] },
-      { g: "行星滚柱丝杠", cos: [["贝斯特","300580"],["恒立液压","601100"],["秦川机床","000837"],["五洲新春","603667"]] },
-      { g: "编码器 / 轴承", cos: [["奥普光电","002338"],["长盛轴承","300718"]] },
       { g: "六维力传感", cos: [["柯力传感","603662"],["东华测试","300354"],["宇立仪器","早期"]] },
       { g: "电子皮肤 / 柔性传感", cos: [["汉威科技","300007"],["福莱新材","605488"],["帕西尼感知","明星"]] },
+      { g: "编码器", cos: [["奥普光电","002338"],["禾川科技","688097"]] },
+      { g: "谐波 / RV 减速器", cos: [["绿的谐波","688017"],["双环传动","002472"],["中大力德","002896"],["国茂股份","603915"]] },
+      { g: "行星滚柱丝杠", cos: [["贝斯特","300580"],["恒立液压","601100"],["秦川机床","000837"],["五洲新春","603667"],["北特科技","603009"]] },
+      { g: "无框力矩电机", cos: [["步科股份","688160"],["雷赛智能","002979"],["昊志机电","300503"],["伟创电气","688698"]] },
+      { g: "空心杯 / 无刷电机", cos: [["江苏雷利","300660"],["鸣志电器","603728"],["拓邦股份","002139"]] },
+      { g: "伺服驱动", cos: [["汇川技术","300124"],["步科股份","688160"],["禾川科技","688097"]] },
+      { g: "稀土永磁", cos: [["金力永磁","300748"],["中科三环","000970"],["正海磁材","300224"]] },
+      { g: "轴承 / 关节轴承", cos: [["长盛轴承","300718"],["五洲新春","603667"]] },
       { g: "轻量化材料 · PEEK", cos: [["中研股份","688716"],["沃特股份","002886"],["普利特","002324"]] },
       { g: "机器人芯片 / 域控", cos: [["地平线","港股"],["黑芝麻智能","港股"],["爱芯元速","明星"],["后摩智能","明星"]] },
     ] },
-    { layer: "中游 · 本体 + 具身大脑 + 仿真", accent: "mid", groups: [
+    { layer: "中游 · 具身大脑 + 关节模组 + 本体", accent: "mid", groups: [
+      { g: "具身大模型 / VLA", cos: [["自变量机器人","明星"],["千寻智能","明星"],["穹彻智能","明星"],["它石智航","早期"],["星海图","明星"],["银河通用","独角兽"],["原力灵机","早期"]] },
+      { g: "通用大模型底座", cos: [["智谱AI","独角兽"],["月之暗面","独角兽"],["科大讯飞","002230"]] },
+      { g: "仿真 / 数据 / 空间智能", cos: [["光轮智能","明星"],["群核科技","拟IPO"],["原力灵机","早期"]] },
+      { g: "关节模组 / 一体化执行器", cos: [["三花智控","002050"],["拓普集团","601689"],["兆威机电","003021"],["双环传动","002472"]] },
       { g: "人形机器人本体", cos: [["宇树科技","拟IPO"],["智元机器人","独角兽"],["星动纪元","明星"],["逐际动力","明星"],["众擎机器人","早期"],["松延动力","早期"],["傅利叶智能","明星"],["乐聚机器人","明星"],["优必选","港股"]] },
-      { g: "关节模组 / 一体化执行器", cos: [["三花智控","002050"],["拓普集团","601689"],["兆威机电","003021"]] },
       { g: "四足 / 移动机器人", cos: [["宇树科技","拟IPO"],["云深处科技","明星"],["九号公司","689009"]] },
       { g: "工业 / 协作机械臂", cos: [["埃斯顿","002747"],["埃夫特","688165"],["新时达","002527"],["节卡机器人","明星"],["珞石机器人","明星"]] },
-      { g: "具身大模型 / VLA", cos: [["自变量机器人","明星"],["千寻智能","明星"],["穹彻智能","明星"],["它石智航","明星"],["星海图","早期"],["银河通用","明星"]] },
-      { g: "仿真 / 数据 / 空间智能", cos: [["光轮智能","明星"],["群核科技","拟IPO"],["原力灵机","早期"]] },
+      { g: "上市方案商", cos: [["虹软科技","688088"],["寒武纪","688256"],["科大讯飞","002230"]] },
     ] },
-    { layer: "下游 · 应用场景", accent: "down", groups: [
-      { g: "工业 / 智能制造", cos: [["拓斯达","300607"],["博实股份","002698"],["巨一科技","688162"]] },
+    { layer: "下游 · 物理载体 · 场景落地", accent: "down", groups: [
+      { g: "人形机器人应用", cos: [["智元机器人","独角兽"],["宇树科技","拟IPO"],["优必选","港股"]] },
+      { g: "智能驾驶", cos: [["Momenta","拟IPO"],["小鹏汽车","港股"],["比亚迪","002594"]] },
+      { g: "工业 / 智能制造", cos: [["拓斯达","300607"],["博实股份","002698"],["巨一科技","688162"],["埃斯顿","002747"]] },
+      { g: "物流 / 仓储", cos: [["极智嘉","独角兽"],["快仓智能","独角兽"],["海康机器人","独角兽"],["中科微至","688211"]] },
       { g: "服务 / 商用", cos: [["科沃斯","603486"],["九号公司","689009"],["普渡科技","明星"],["擎朗智能","明星"]] },
-      { g: "物流 / 仓储", cos: [["极智嘉","明星"],["快仓智能","明星"],["海康机器人","明星"]] },
+      { g: "医疗 / 康复", cos: [["天智航","688277"],["微创机器人","港股"],["傅利叶智能","明星"]] },
+      { g: "特种 / 电力巡检", cos: [["亿嘉和","603666"],["申昊科技","300853"]] },
     ] },
   ];
   const physQuotes = {};
@@ -852,8 +865,48 @@
         <div><span>平均涨跌</span><b class="${d.avgChg >= 0 ? "up" : "down"}">${d.avgChg >= 0 ? "+" : ""}${d.avgChg.toFixed(2)}%</b></div>
         <div><span>主力净流入</span><b class="${d.netInflow >= 0 ? "up" : "down"}">${yi(d.netInflow)}</b></div>
       </div>
+      ${paSparkHtml()}
       <p class="pa-idx-note">指数由 ${d.n} 家上市供应商<b>实时行情</b>与<b>实时主力资金流</b>合成（50 为中性），随行情刷新，非预设值。</p>
     </div>`;
+  }
+  // 历史曲线：服务端每 5 分钟落盘一次快照，这里画迷你走势
+  let paHistory = [];
+  function paSparkHtml() {
+    if (paHistory.length < 2) {
+      return `<p class="pa-spark-empty">趋势曲线累积中 · 已记录 ${paHistory.length} 个采样点（服务端每 5 分钟落盘一次，重启不丢）</p>`;
+    }
+    const W = 520, H = 44, pad = 2;
+    const vals = paHistory.map((h) => h.value);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const span = Math.max(1, max - min);
+    const pts = paHistory.map((h, i) => {
+      const x = pad + (i / (paHistory.length - 1)) * (W - pad * 2);
+      const y = pad + (1 - (h.value - min) / span) * (H - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+    const first = paHistory[0], last = paHistory[paHistory.length - 1];
+    const diff = last.value - first.value;
+    const cls = diff >= 0 ? "up" : "down";
+    const t = (ms) => new Date(ms).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+    return `<div class="pa-spark">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="景气指数走势">
+        <polyline points="${pts}" fill="none" stroke="${diff >= 0 ? "#d3352a" : "#0b8a5f"}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />
+      </svg>
+      <div class="pa-spark-meta">
+        <span>${esc(t(first.ts))}</span>
+        <b class="${cls}">${diff >= 0 ? "+" : ""}${diff} （区间 ${min}~${max}）</b>
+        <span>${esc(t(last.ts))} · ${paHistory.length} 点</span>
+      </div>
+    </div>`;
+  }
+  async function syncPaIndex() {
+    try {
+      const d = await fetchJSON("/api/pa-index", 12000);
+      if (d && d.ok && Array.isArray(d.history)) {
+        paHistory = d.history;
+        if (state.activeTab === "hardtech") { const hub = document.querySelector(".pa-hub"); if (hub) hub.outerHTML = renderPhysAI(); }
+      }
+    } catch (e) { /* 历史不可用时只是不画曲线，不影响指数本身 */ }
   }
   // 环节资金流：把该环节内上市公司的实时主力净流入汇总
   function nodeFlow(group) {
@@ -1353,7 +1406,7 @@
     el("dock-tabs").innerHTML = tabs.map((t) =>
       `<button class="tab-button ${state.activeTab === t.id ? "active" : ""}" data-tab="${t.id}" type="button">${esc(t.label)}</button>`).join("");
     el("dock-tabs").querySelectorAll("[data-tab]").forEach((b) =>
-      b.addEventListener("click", () => { state.activeTab = b.dataset.tab; renderTabs(); if (b.dataset.tab === "anomaly") syncBoards(); if (b.dataset.tab === "chongqing") syncCqIntel(); if (b.dataset.tab === "policy") syncPolicyIntel(); if (b.dataset.tab === "hardtech") { syncPhysAI(); syncPaExtra(); syncHardtechNews(); syncFinancingRadar(); } if (b.dataset.tab === "regions") syncRegionsQuotes(); if (b.dataset.tab === "early") syncEarlyRadar(); }));
+      b.addEventListener("click", () => { state.activeTab = b.dataset.tab; renderTabs(); if (b.dataset.tab === "anomaly") syncBoards(); if (b.dataset.tab === "chongqing") syncCqIntel(); if (b.dataset.tab === "policy") syncPolicyIntel(); if (b.dataset.tab === "hardtech") { syncPhysAI(); syncPaIndex(); syncPaExtra(); syncHardtechNews(); syncFinancingRadar(); } if (b.dataset.tab === "regions") syncRegionsQuotes(); if (b.dataset.tab === "early") syncEarlyRadar(); }));
     const tab = tabs.find((t) => t.id === state.activeTab) || tabs[0];
     const dc = el("dock-content");
     dc.innerHTML = tab.render();
@@ -1682,7 +1735,7 @@
   window.setInterval(() => { if (state.activeTab === "anomaly") syncBoards(); }, 30000); // 板块异动随激活标签每 30s 刷新
   window.setInterval(() => { if (state.activeTab === "chongqing") { Object.keys(cqNews).forEach((k) => delete cqNews[k]); syncCqIntel(); } }, 120000); // 重庆专版情报每 2 分钟刷新
   window.setInterval(() => { if (state.activeTab === "hardtech") { syncPhysAI(); syncPaExtra(); syncHardtechNews(); syncFinancingRadar(); } }, 120000); // 硬科技初创：物理AI行情/融资/政策 + 快讯 + 融资雷达每 2 分钟刷新
-  window.setInterval(() => { if (state.activeTab === "hardtech") syncPhysAI(); }, 30000); // 物理AI 上市供应商行情每 30s 刷新
+  window.setInterval(() => { if (state.activeTab === "hardtech") { syncPhysAI(); syncPaIndex(); } }, 30000); // 物理AI 上市供应商行情每 30s 刷新
   window.setInterval(() => { if (state.activeTab === "regions") syncRegionsQuotes(); }, 30000); // 省域产业：代表企业行情每 30s 刷新
   window.setInterval(() => { if (state.activeTab === "early") syncEarlyRadar(); }, 120000); // 早期雷达每 2 分钟刷新
 })();

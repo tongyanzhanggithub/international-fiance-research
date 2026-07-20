@@ -24,6 +24,18 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_news_first ON news(first_seen);
   CREATE INDEX IF NOT EXISTS idx_news_kw ON news(keyword);
+
+  -- 指数快照：景气指数等由实时行情合成的指标需落盘才能看趋势（内存里只有瞬时值）
+  CREATE TABLE IF NOT EXISTS idx_snap (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,           -- 指数名，如 'physical_ai'
+    ts INTEGER NOT NULL,          -- 采样时刻 ms
+    value REAL NOT NULL,          -- 指数值
+    avg_chg REAL,                 -- 成分股平均涨跌幅 %
+    inflow REAL,                  -- 主力净流入合计 元
+    up INTEGER, down INTEGER, n INTEGER
+  );
+  CREATE INDEX IF NOT EXISTS idx_snap_name_ts ON idx_snap(name, ts);
 `);
 
 const hash = (s) => crypto.createHash("sha1").update(String(s)).digest("hex");
@@ -114,4 +126,25 @@ function prune(days = 180) {
   return info.changes || 0;
 }
 
-module.exports = { record, list, trend, stats, prune };
+// —— 指数快照 ——
+// 节流写入：同一指数 minGapMs 内不重复落盘，避免每次刷新都写库。
+function recordIndex(name, snap, minGapMs = 5 * 60 * 1000) {
+  const now = Date.now();
+  const last = db.prepare("SELECT ts FROM idx_snap WHERE name=? ORDER BY ts DESC LIMIT 1").get(name);
+  if (last && now - Number(last.ts) < minGapMs) return false;
+  db.prepare("INSERT INTO idx_snap(name,ts,value,avg_chg,inflow,up,down,n) VALUES(?,?,?,?,?,?,?,?)")
+    .run(name, now, Number(snap.value) || 0, Number(snap.avgChg) || 0, Number(snap.inflow) || 0,
+      Number(snap.up) || 0, Number(snap.down) || 0, Number(snap.n) || 0);
+  return true;
+}
+
+function indexHistory(name, limit = 120) {
+  const rows = db.prepare("SELECT ts,value,avg_chg,inflow,up,down,n FROM idx_snap WHERE name=? ORDER BY ts DESC LIMIT ?")
+    .all(name, Math.max(1, Math.min(500, Number(limit) || 120)));
+  return rows.reverse().map((r) => ({
+    ts: Number(r.ts), value: Number(r.value), avgChg: Number(r.avg_chg),
+    inflow: Number(r.inflow), up: Number(r.up), down: Number(r.down), n: Number(r.n),
+  }));
+}
+
+module.exports = { record, list, trend, stats, prune, recordIndex, indexHistory };

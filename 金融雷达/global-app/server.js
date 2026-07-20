@@ -505,6 +505,17 @@ async function loadCnMarkets() {
 // 批量个股实时行情——供「产业链」板块的代表企业行情叠加
 // secids 形如 "0.300750,1.601127"（0=深/1=沪），返回 { 代码: { value, change } }
 // 双源冗余：新浪个股为主（稳定），东财 ulist 补全，任一可用即可
+// 物理AI 景气指数成分股：与前端 PHYS_AI 专区的上市供应商保持一致（55 只，均已校验可取到行情）。
+// 放在服务端是为了让指数由服务端独立计算并落盘，前端只负责展示，数值不可被伪造。
+const PA_INDEX_CODES = [
+  "000837", "000970", "002050", "002139", "002230", "002324", "002338", "002472", "002527", "002594",
+  "002698", "002747", "002886", "002896", "002979", "003021", "300007", "300124", "300224", "300354",
+  "300503", "300580", "300607", "300660", "300718", "300748", "300853", "601100", "601689", "603009",
+  "603486", "603662", "603666", "603667", "603728", "603893", "603915", "605488", "688017", "688071",
+  "688088", "688097", "688099", "688160", "688162", "688165", "688167", "688211", "688256", "688277",
+  "688322", "688582", "688698", "688716", "689009",
+];
+
 async function loadCnStocks(secids) {
   if (!secids) return {};
   const list = secids.split(",").filter(Boolean);
@@ -1766,6 +1777,30 @@ const server = http.createServer(async (request, response) => {
       sendJson(response, 200, { ok: Object.keys(quotes).length > 0, quotes, stale: result.stale, error: result.error, fetchedAt: result.fetchedAt });
     } catch (error) {
       sendJson(response, 200, { ok: false, quotes: {}, error: error.message });
+    }
+    return;
+  }
+  // 物理AI 景气指数：服务端自行取行情计算并落盘，不接受前端上报的数值（避免被伪造）
+  if (pathname === "/api/pa-index") {
+    try {
+      const secids = PA_INDEX_CODES.map((c) => (c[0] === "6" ? "1." : "0.") + c).join(",");
+      const result = await cachedProvider("cn-stocks:" + secids, 20 * 1000, () => loadCnStocks(secids));
+      const quotes = result.data && !Array.isArray(result.data) ? result.data : {};
+      const rows = PA_INDEX_CODES.map((c) => quotes[c]).filter(Boolean);
+      if (!rows.length) throw new Error("行情源暂不可用");
+      const avgChg = rows.reduce((s, r) => s + (r.change || 0), 0) / rows.length;
+      const flowRows = rows.filter((r) => Number.isFinite(r.inflowPct));
+      const avgFlowPct = flowRows.length ? flowRows.reduce((s, r) => s + r.inflowPct, 0) / flowRows.length : 0;
+      const inflow = rows.reduce((s, r) => s + (Number.isFinite(r.inflow) ? r.inflow : 0), 0);
+      const up = rows.filter((r) => (r.change || 0) > 0).length;
+      const value = Math.max(0, Math.min(100, Math.round(50 + avgChg * 6 + avgFlowPct * 2)));
+      const snap = { value, avgChg, inflow, up, down: rows.length - up, n: rows.length };
+      try { archive.recordIndex("physical_ai", snap); } catch (e) { /* 落盘失败不影响返回 */ }
+      let history = [];
+      try { history = archive.indexHistory("physical_ai", 120); } catch (e) { /* 无历史不影响 */ }
+      sendJson(response, 200, { ok: true, ...snap, history, fetchedAt: result.fetchedAt });
+    } catch (error) {
+      sendJson(response, 200, { ok: false, error: error.message });
     }
     return;
   }

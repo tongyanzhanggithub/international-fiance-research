@@ -565,6 +565,15 @@
     }
   }
 
+  // 环节主力资金净流入：汇总该环节内上市公司的实时资金流（/api/cn-stocks 已随行情一并返回）
+  function sectorFlowHtml(g) {
+    const rows = g.cos.filter((co) => isListed(co[1])).map((co) => quotes[co[1]]).filter((q) => q && Number.isFinite(q.inflow));
+    if (!rows.length) return "";
+    const sum = rows.reduce((s, q) => s + q.inflow, 0);
+    const txt = `${sum >= 0 ? "+" : "−"}${Math.abs(sum / 1e8).toFixed(2)}亿`;
+    return `<i class="cr-flow ${sum >= 0 ? "up" : "down"}" title="该环节上市公司主力净流入合计（实时）">${txt}</i>`;
+  }
+
   const tierCls = { "上游": "up", "中游": "mid", "下游": "down", "基础层": "up", "技术层": "mid", "应用层": "down" };
 
   const UNTAG = { "独角兽": "uni", "拟IPO": "ipo", "港股": "hk", "美股": "us", "未上市": "np", "国企": "np" };
@@ -614,7 +623,7 @@
       `<section class="cr-layer cr-${tierCls[L.tier] || "mid"}">
         <div class="cr-layer-head"><span class="cr-tier">${esc(L.tier)}</span><small>${esc(L.desc)}</small></div>
         <div class="cr-groups">${L.groups.map((g) =>
-          `<div class="cr-group" data-sector="${esc(g.sector)}" data-tier="${esc(L.tier)}"><span class="cr-sector">${esc(g.sector)}<i class="cr-intel-cue">情报 ›</i></span><div class="cr-cos">${g.cos.map(coChip).join("")}</div></div>`).join("")}</div>
+          `<div class="cr-group" data-sector="${esc(g.sector)}" data-tier="${esc(L.tier)}"><span class="cr-sector">${esc(g.sector)}${sectorFlowHtml(g)}<i class="cr-intel-cue">情报 ›</i></span><div class="cr-cos">${g.cos.map(coChip).join("")}</div></div>`).join("")}</div>
       </section>`).join('<div class="cr-flow">▼</div>');
 
     el("cr-main").innerHTML = header + `<div class="cr-map">${layers}</div>`;
