@@ -527,16 +527,22 @@ async function loadCnStocks(secids) {
   } catch (error) {
     /* 新浪个股不可用，尝试东财 */
   }
-  if (Object.keys(out).length < list.length) {
-    try {
-      const j = await fetchJson(`https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f12,f14&secids=${secids}`, { timeout: 6000 });
-      (j?.data?.diff || []).forEach((x) => {
-        const code = String(x.f12);
-        if (!out[code] && typeof x.f2 === "number") out[code] = { value: x.f2, change: Number(x.f3) || 0 };
-      });
-    } catch (error) {
-      /* 东财个股不可用 */
-    }
+  // 东财：补齐新浪缺的行情，并统一附加实时资金流（f62 主力净流入·元，f184 主力净占比·%）
+  // 资金流走同一次请求，不额外增加外部调用。
+  try {
+    const j = await fetchJson(`https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f2,f3,f12,f14,f62,f184&secids=${secids}`, { timeout: 6000 });
+    (j?.data?.diff || []).forEach((x) => {
+      const code = String(x.f12);
+      if (!out[code] && typeof x.f2 === "number") out[code] = { value: x.f2, change: Number(x.f3) || 0 };
+      if (out[code]) {
+        const inflow = Number(x.f62);
+        const ratio = Number(x.f184);
+        if (Number.isFinite(inflow)) out[code].inflow = inflow;   // 主力净流入（元）
+        if (Number.isFinite(ratio)) out[code].inflowPct = ratio;  // 主力净占比（%）
+      }
+    });
+  } catch (error) {
+    /* 东财不可用：保留新浪行情，资金流缺失时前端自行降级 */
   }
   if (!Object.keys(out).length) throw new Error("个股行情数据源暂不可用");
   return out;

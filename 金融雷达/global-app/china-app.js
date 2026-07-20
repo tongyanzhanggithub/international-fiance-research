@@ -818,14 +818,58 @@
     }
     return `<span class="pa-co"><b>${esc(name)}</b><i class="ht-badge ht-${HT_BADGE[tag] || "star"}">${esc(tag)}</i></span>`;
   }
+  // —— 物理AI 景气指数：完全由上市供应商的实时行情 + 实时主力资金流合成，无任何硬编码 ——
+  // 指数 = 50 + 平均涨跌幅×6 + 资金流强度×2，裁剪到 0~100。
+  // 50 为中性；涨跌与资金同向时指数才会明显偏离，避免只看涨跌被单日情绪带偏。
+  function paIndexData() {
+    const codes = new Set();
+    PHYS_AI.forEach((L) => L.groups.forEach((g) => g.cos.forEach(([, c]) => { if (isCode6(c)) codes.add(c); })));
+    const rows = [...codes].map((c) => physQuotes[c]).filter(Boolean);
+    if (!rows.length) return null;
+    const avgChg = rows.reduce((s, r) => s + (r.change || 0), 0) / rows.length;
+    const flowRows = rows.filter((r) => Number.isFinite(r.inflowPct));
+    const avgFlowPct = flowRows.length ? flowRows.reduce((s, r) => s + r.inflowPct, 0) / flowRows.length : 0;
+    const netInflow = rows.reduce((s, r) => s + (Number.isFinite(r.inflow) ? r.inflow : 0), 0);
+    const up = rows.filter((r) => (r.change || 0) > 0).length;
+    const idx = Math.max(0, Math.min(100, Math.round(50 + avgChg * 6 + avgFlowPct * 2)));
+    return { idx, avgChg, avgFlowPct, netInflow, up, down: rows.length - up, n: rows.length, flowN: flowRows.length };
+  }
+  const yi = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v / 1e8).toFixed(2)} 亿`;
+  function paIndexHtml() {
+    const d = paIndexData();
+    if (!d) return `<div class="pa-index"><span class="cn-empty">景气指数计算中…（等待实时行情）</span></div>`;
+    const lvl = d.idx >= 65 ? "热" : d.idx >= 55 ? "偏暖" : d.idx >= 45 ? "中性" : d.idx >= 35 ? "偏冷" : "冷";
+    const cls = d.idx >= 55 ? "up" : d.idx <= 45 ? "down" : "flat";
+    return `<div class="pa-index">
+      <div class="pa-idx-main">
+        <span class="pa-idx-lbl">物理AI 景气指数</span>
+        <strong class="pa-idx-val ${cls}">${d.idx}</strong>
+        <i class="pa-idx-lvl ${cls}">${lvl}</i>
+      </div>
+      <div class="pa-idx-cells">
+        <div><span>成分股</span><b>${d.n} 家</b></div>
+        <div><span>涨跌</span><b class="${d.up >= d.down ? "up" : "down"}">${d.up} 涨 ${d.down} 跌</b></div>
+        <div><span>平均涨跌</span><b class="${d.avgChg >= 0 ? "up" : "down"}">${d.avgChg >= 0 ? "+" : ""}${d.avgChg.toFixed(2)}%</b></div>
+        <div><span>主力净流入</span><b class="${d.netInflow >= 0 ? "up" : "down"}">${yi(d.netInflow)}</b></div>
+      </div>
+      <p class="pa-idx-note">指数由 ${d.n} 家上市供应商<b>实时行情</b>与<b>实时主力资金流</b>合成（50 为中性），随行情刷新，非预设值。</p>
+    </div>`;
+  }
+  // 环节资金流：把该环节内上市公司的实时主力净流入汇总
+  function nodeFlow(group) {
+    const rows = group.cos.filter(([, c]) => isCode6(c)).map(([, c]) => physQuotes[c]).filter((q) => q && Number.isFinite(q.inflow));
+    if (!rows.length) return null;
+    return rows.reduce((s, r) => s + r.inflow, 0);
+  }
   function renderPhysAI() {
     const listed = new Set(); PHYS_AI.forEach((L) => L.groups.forEach((g) => g.cos.forEach(([, c]) => { if (isCode6(c)) listed.add(c); })));
     const total = PHYS_AI.reduce((n, L) => n + L.groups.reduce((m, g) => m + g.cos.length, 0), 0);
     return `<section class="pa-hub">
       <div class="pa-hub-head"><h3>🤖 物理AI · 具身智能产业链</h3><span>上游零部件 → 本体 + 具身大脑 + 仿真 → 下游应用 · ${listed.size} 家上市供应商实时行情 + 未上市新锐（共 ${total}）</span></div>
+      ${paIndexHtml()}
       ${PHYS_AI.map((L) => `<div class="pa-layer pa-${L.accent}">
         <div class="pa-layer-h">${esc(L.layer)}</div>
-        <div class="pa-groups">${L.groups.map((g) => `<div class="pa-group" data-pa-node="${esc(g.g)}" title="点击查看「${esc(g.g)}」环节详情与实时快讯"><span class="pa-g-name">${esc(g.g)} <i class="pa-g-go">›</i></span><div class="pa-cos">${g.cos.map(physChip).join("")}</div></div>`).join("")}</div>
+        <div class="pa-groups">${L.groups.map((g) => `<div class="pa-group" data-pa-node="${esc(g.g)}" title="点击查看「${esc(g.g)}」环节详情与实时快讯"><span class="pa-g-name">${esc(g.g)}${(() => { const f = nodeFlow(g); return f === null ? "" : `<i class="pa-g-flow ${f >= 0 ? "up" : "down"}" title="该环节上市公司主力净流入合计（实时）">${yi(f)}</i>`; })()} <i class="pa-g-go">›</i></span><div class="pa-cos">${g.cos.map(physChip).join("")}</div></div>`).join("")}</div>
       </div>`).join("")}
       <div class="pa-extra">
         <section class="pa-sub">
