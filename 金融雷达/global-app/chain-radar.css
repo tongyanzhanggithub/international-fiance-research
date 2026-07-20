@@ -274,3 +274,16 @@
   .cr-main { overflow-y: visible; }
   .cr-side { align-self: start; position: sticky; top: 60px; max-height: calc(100vh - 60px); overflow-y: auto; }
 }
+
+/* ============================================================
+   修复：情报面板 / 遮罩 未点击就自动显示
+   ------------------------------------------------------------
+   .cr-intel 设了 display:flex、.cr-intel-backdrop 设了 position:fixed，
+   其优先级高于 hidden 属性所依赖的浏览器默认 display:none，
+   导致 <aside hidden> 从加载起就一直可见，closeIntel() 也关不掉。
+   显式声明 [hidden] 规则修正。
+   ============================================================ */
+.cr-intel[hidden],
+.cr-intel-backdrop[hidden] {
+  display: none !important;
+}

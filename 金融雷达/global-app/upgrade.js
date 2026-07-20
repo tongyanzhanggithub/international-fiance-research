@@ -1054,7 +1054,9 @@ function initializeGeoMap() {
       worldCopyJump: true,
       attributionControl: false,
     });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    // 瓦片跟随主题：浅色主题必须用 light_all，否则白底页面配黑底地图会非常突兀
+    const tileStyle = document.documentElement.getAttribute("data-theme") === "light" ? "light_all" : "dark_all";
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${tileStyle}/{z}/{x}/{y}{r}.png`, {
       subdomains: "abcd",
       maxZoom: 20,
       attribution: "",

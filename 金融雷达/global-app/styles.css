@@ -7244,3 +7244,491 @@ body[data-reading-size="max"] .ashare-market-board span {
   .analysis-dock:not(.expanded) { overflow: visible; min-height: var(--dock); }
   .analysis-dock:not(.expanded) .dock-content { overflow: visible; }
 }
+
+/* ============================================================
+   矮窗口自适应修复（min-width:921px 且视口高度 ≤940px）
+   ------------------------------------------------------------
+   原有 max-height:940px 规则采取「整页滚动 + 面板按内容全展开」，
+   实测在 900px 窗口下整页被撑到 6000px+（地图区 2769px、分析面板
+   2459px），而 941px 以上反而是规整的一屏，行为不一致且难用。
+   另外该规则只声明 2 行，第 3 行（分析面板）落入不受约束的隐式
+   auto 行；第 1 行 .risk-overview 被锁为 minmax(440px,72vh)，
+   在矮窗口里几乎占满整屏。
+   ------------------------------------------------------------
+   修复：在全部矮窗口下恢复与大屏一致的「一屏 + 内部滚动」模型，
+   显式声明 3 行，压缩风险条并让其内部滚动，分析面板内容区自行滚动。
+   仅影响 ≤940px 的窗口，≥941px 的常规尺寸完全不受影响。
+   ============================================================ */
+@media (min-width: 921px) and (max-height: 940px) {
+  /* 注意：不要动 html/body 的 overflow —— 产业链雷达(chain.html)没有 .app-shell，
+     是需要整页滚动的长页面，全局禁滚会让其内容无法访问。
+     这里只约束 .app-shell 自身，其余页面完全不受影响。 */
+  .app-shell {
+    height: 100vh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    grid-template-rows: 60px calc(100vh - 60px) !important;
+  }
+
+  body { --dock: clamp(210px, 30vh, 300px); }
+
+  .workspace {
+    grid-template-rows: auto minmax(180px, 1fr) var(--dock) !important;
+  }
+
+  /* 风险态势条：压缩并内部滚动，不再霸占整屏 */
+  .risk-overview {
+    max-height: 32vh;
+    overflow-y: auto;
+  }
+
+  /* 分析面板：外壳固定高度，内容区自己滚动（原规则让它按内容无限展开） */
+  .analysis-dock:not(.expanded) {
+    overflow: hidden !important;
+    min-height: 0 !important;
+  }
+  .analysis-dock:not(.expanded) .dock-content {
+    overflow: auto !important;
+  }
+
+  .map-canvas { min-height: 150px !important; }
+  #cn-leaflet { min-height: 140px !important; }
+}
+
+/* 更矮：进一步压缩，保证地图与分析面板都还可用 */
+@media (min-width: 921px) and (max-height: 700px) {
+  body { --dock: clamp(180px, 30vh, 230px); }
+  .workspace { grid-template-rows: auto minmax(150px, 1fr) var(--dock) !important; }
+  .risk-overview { max-height: 28vh; }
+  .map-canvas { min-height: 120px !important; }
+  #cn-leaflet { min-height: 110px !important; }
+}
+
+/* 极矮（半屏窗口）：顶栏收窄，各区取最小可用值 */
+@media (min-width: 921px) and (max-height: 580px) {
+  body { --dock: clamp(160px, 30vh, 200px); }
+  .app-shell { grid-template-rows: 52px calc(100vh - 52px) !important; }
+  .topbar { height: 52px; }
+  .workspace { grid-template-rows: auto minmax(110px, 1fr) var(--dock) !important; }
+  .risk-overview { max-height: 24vh; }
+  .map-canvas { min-height: 90px !important; }
+  #cn-leaflet { min-height: 85px !important; }
+  .map-toolbar { padding-top: 6px; padding-bottom: 6px; }
+}
+
+/* ============================================================
+   浅色主题（方案 A · 冷灰白）
+   ------------------------------------------------------------
+   通过 <html data-theme="light"> 启用。深色主题完全不受影响，
+   随时可切回（去掉该属性即可）。
+   设计原则：层次靠「浅灰页底 / 纯白卡片 / 清晰描边」三段划分，
+   不靠阴影堆砌；涨红跌绿保留语义、仅加深以适配白底。
+   ============================================================ */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #eef1f5;          /* 页面底：浅灰 */
+  --surface: #ffffff;     /* 卡片：纯白 */
+  --surface-2: #f4f7fa;   /* 次级填充 */
+  --surface-3: #e9eef4;   /* 三级填充 */
+  --line: #d9e0ea;        /* 描边 */
+  --line-soft: #e9eef4;   /* 弱描边 */
+  --text: #16202c;        /* 主文字：深岩灰 */
+  --muted: #5c6779;       /* 次要文字 */
+  --faint: #737f92;       /* 弱文字 */
+  --teal: #0d9488;        /* 强调（加深，白底可读） */
+  --amber: #c77d0a;
+  --red: #d3352a;         /* 涨红（色相不变，加深） */
+  --blue: #1668bf;
+  --green: #0b8a5f;       /* 跌绿（色相不变，加深） */
+}
+
+/* —— 页面骨架：网格底纹由「白线」翻为「暗线」 —— */
+:root[data-theme="light"] .app-shell {
+  background:
+    linear-gradient(rgba(22, 32, 44, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 32, 44, 0.028) 1px, transparent 1px),
+    var(--bg);
+  background-size: 40px 40px;
+}
+
+/* —— 深色底专用的白色微叠加，在浅色下翻为暗色微叠加 —— */
+:root[data-theme="light"] .cq-news,
+:root[data-theme="light"] .cn-board-row,
+:root[data-theme="light"] .pa-group,
+:root[data-theme="light"] .pa-co,
+:root[data-theme="light"] .pd-stats > div {
+  background: var(--surface);
+}
+:root[data-theme="light"] .cn-fs-row {
+  border-bottom-color: var(--line-soft);
+}
+:root[data-theme="light"] .pa-layer,
+:root[data-theme="light"] .pa-sub {
+  background: var(--surface-2);
+}
+:root[data-theme="light"] .ht-radar,
+:root[data-theme="light"] .ht-radar--early,
+:root[data-theme="light"] .pa-hub {
+  background: var(--surface);
+}
+
+/* —— 阴影减淡（深色下的重阴影在浅色上会显脏） —— */
+:root[data-theme="light"] .pd-panel {
+  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.16);
+  background: var(--surface);
+}
+:root[data-theme="light"] .pd-backdrop {
+  background: rgba(16, 24, 40, 0.42);
+}
+
+/* —— 地图 —— */
+:root[data-theme="light"] .map-canvas {
+  background: var(--surface-2);
+}
+:root[data-theme="light"] #cn-leaflet,
+:root[data-theme="light"] .leaflet-container {
+  background: #f7f9fc;
+}
+/* 省份名：深色文字 + 浅色描边（原为浅字+黑阴影） */
+:root[data-theme="light"] .leaflet-tooltip.cn-prov-label {
+  color: #3d4a5c;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+:root[data-theme="light"] .leaflet-tooltip.cn-prov-label--key {
+  color: #16202c;
+}
+:root[data-theme="light"] .leaflet-tooltip.cn-hub-tip {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.14);
+}
+:root[data-theme="light"] .leaflet-bar a {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+/* —— 品牌红在白底下加深 —— */
+:root[data-theme="light"] .brand-mark {
+  color: #c0392b !important;
+  border-color: rgba(192, 57, 43, 0.35) !important;
+  background: rgba(192, 57, 43, 0.07);
+}
+
+/* —— 浅色主题：结构面板背景覆盖 ——
+   这些面板在深色主题里是硬编码的深色 rgba（不走令牌），
+   若不覆盖，浅色下会出现「深色面板 + 深色文字」= 完全不可读。
+   这正是机械翻转会做丑的根本原因。 */
+:root[data-theme="light"] .topbar,
+:root[data-theme="light"] .risk-overview,
+:root[data-theme="light"] .map-toolbar,
+:root[data-theme="light"] .map-legend,
+:root[data-theme="light"] .insight-rail,
+:root[data-theme="light"] .event-rail,
+:root[data-theme="light"] .analysis-dock,
+:root[data-theme="light"] .market-strip,
+:root[data-theme="light"] .dock-tabs,
+:root[data-theme="light"] .map-focus,
+:root[data-theme="light"] .event-card,
+:root[data-theme="light"] .insight-card,
+:root[data-theme="light"] .brief-lead,
+:root[data-theme="light"] .detail-panel {
+  background: var(--surface) !important;
+  color: var(--text);
+}
+:root[data-theme="light"] .icon-button,
+:root[data-theme="light"] .icon-button:hover,
+:root[data-theme="light"] .event-tags span,
+:root[data-theme="light"] .detail-meta span,
+:root[data-theme="light"] .focus-score span,
+:root[data-theme="light"] .ashare-metrics strong,
+:root[data-theme="light"] .watch-scoreboard strong,
+:root[data-theme="light"] .watch-rule-list strong {
+  background: var(--surface-2) !important;
+  color: var(--text);
+  border-color: var(--line);
+}
+
+/* —— 浅色主题：深色底专用的浅色调强调色需加深 ——
+   #6fe3c8（浅青）、#e8907f（浅珊瑚）是为黑底设计的，
+   白底下对比度仅 1.5~2.4，几乎看不见。色相保留，压深到可读。 */
+:root[data-theme="light"] .market-live,
+:root[data-theme="light"] .cq-stat--live > strong,
+:root[data-theme="light"] .cq-badge.hot {
+  color: #0d7a6b !important;
+}
+:root[data-theme="light"] .eyebrow,
+:root[data-theme="light"] .cn-tier-label,
+:root[data-theme="light"] .cn-rule-org,
+:root[data-theme="light"] .cn-analyze-btn,
+:root[data-theme="light"] .cn-insight-block > b,
+:root[data-theme="light"] .cn-policy-go,
+:root[data-theme="light"] .pd-more,
+:root[data-theme="light"] .cn-news-link:hover,
+:root[data-theme="light"] .cn-focus-news a:hover {
+  color: #b03a2e !important;
+}
+/* 板块资金流「上」用的浅珊瑚同样加深，与涨红保持一致语义 */
+:root[data-theme="light"] .cn-board-flow.up {
+  color: #c0392b !important;
+}
+
+/* —— 浅色主题：涨跌色加深 ——
+   深色版 #e5564a / #3fae6d 是为黑底调的，白底下发飘、辨识度不足。
+   色相与语义完全不变（涨仍红、跌仍绿），仅压深到白底可读，
+   与东财 / 同花顺白底配色一致。 */
+:root[data-theme="light"] .cn-focus-stocks .up,
+:root[data-theme="light"] .cn-fs-row i.up,
+:root[data-theme="light"] .cn-fs-sum b.up,
+:root[data-theme="light"] .rg-avg.up,
+:root[data-theme="light"] .rg-live .up,
+:root[data-theme="light"] .pa-q.up,
+:root[data-theme="light"] .cn-board-h.up,
+
+:root[data-theme="light"] .cn-board-chg.up,
+:root[data-theme="light"] .market-change.up,
+:root[data-theme="light"] .cn-anom-row .chg.up {
+  color: #d3352a !important;
+}
+:root[data-theme="light"] .cn-focus-stocks .down,
+:root[data-theme="light"] .cn-fs-row i.down,
+:root[data-theme="light"] .cn-fs-sum b.down,
+:root[data-theme="light"] .rg-avg.down,
+:root[data-theme="light"] .rg-live .down,
+:root[data-theme="light"] .pa-q.down,
+:root[data-theme="light"] .cn-board-h.down,
+:root[data-theme="light"] .cn-board-chg.down,
+:root[data-theme="light"] .market-change.down,
+:root[data-theme="light"] .cn-anom-row .chg.down {
+  color: #0b8a5f !important;
+}
+/* 外链等零散浅色文字 */
+:root[data-theme="light"] .cn-focus-src a,
+:root[data-theme="light"] .cq-src a,
+:root[data-theme="light"] a[href*="sina"],
+:root[data-theme="light"] a[href*="eastmoney"] {
+  color: #b03a2e;
+}
+
+/* 「原文 ↗」等来源链接：用的是 --teal，白底下压深一档保证可读 */
+:root[data-theme="light"] .event-source-link,
+:root[data-theme="light"] .source-link {
+  color: #0b6b5f;
+}
+
+/* —— 浅色主题：省份聚焦面板（悬停/点击才出现，之前被可见性扫描漏掉） —— */
+:root[data-theme="light"] .map-focus {
+  background: var(--surface) !important;
+  border-color: rgba(13, 148, 136, 0.28);
+  border-left-color: var(--teal);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+}
+:root[data-theme="light"] #cn-focus-body > span {
+  color: var(--muted);
+}
+:root[data-theme="light"] .cn-focus-news a {
+  color: #3d4a5c;
+}
+:root[data-theme="light"] .cn-focus-news a:hover {
+  color: #b03a2e;
+}
+:root[data-theme="light"] #cn-focus-body::-webkit-scrollbar-thumb {
+  background: rgba(22, 32, 44, 0.18);
+}
+:root[data-theme="light"] .focus-score span,
+:root[data-theme="light"] .focus-category {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--line);
+}
+/* 提示气泡、下拉等同为悬停态的浮层 */
+:root[data-theme="light"] .tooltip,
+:root[data-theme="light"] .tip-bubble,
+:root[data-theme="light"] .dropdown-panel,
+:root[data-theme="light"] .menu-panel {
+  background: var(--surface) !important;
+  color: var(--text);
+  border-color: var(--line);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+}
+
+/* —— 浅色主题：隐藏态浮层（悬停/条件出现，需全量扫描才能发现） —— */
+:root[data-theme="light"] .route-snapshot,
+:root[data-theme="light"] .toast,
+:root[data-theme="light"] .ai-fab,
+:root[data-theme="light"] .ai-launcher,
+:root[data-theme="light"] .chat-panel,
+:root[data-theme="light"] .chat-window {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--line);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.14);
+}
+/* 「💬 问 AI」悬浮按钮：白底下用品牌红实心更醒目 */
+:root[data-theme="light"] button.ai-fab,
+:root[data-theme="light"] .ai-fab button {
+  background: #c0392b !important;
+  color: #fff !important;
+  border-color: #c0392b;
+}
+/* 深色底专用的浅色正文 #cfe0db → 浅色下转深 */
+:root[data-theme="light"] .route-snapshot span,
+:root[data-theme="light"] .route-snapshot b,
+:root[data-theme="light"] .toast span {
+  color: var(--muted) !important;
+}
+
+/* —— 浅色主题：用 id 选择的浮层（#toast / #fa-toggle 悬浮问AI按钮） —— */
+:root[data-theme="light"] #toast {
+  background: rgba(255, 255, 255, 0.98) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.16);
+}
+:root[data-theme="light"] #fa-toggle {
+  background: #c0392b !important;
+  color: #fff !important;
+  border-color: #c0392b !important;
+  box-shadow: 0 4px 14px rgba(192, 57, 43, 0.3);
+}
+
+/* #toast 带 transition:all，过渡优先级高于 !important，需用最高特异性 + background-color 强制 */
+html[data-theme="light"] div#toast.toast {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  background-image: none !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+
+/* ============================================================
+   浅色主题：入口页（选择你的产业金融雷达）
+   卡片原为深色半透明渐变，浅色下需转为白卡 + 浅描边。
+   ============================================================ */
+:root[data-theme="light"] .rs-card {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+:root[data-theme="light"] .rs-card:hover {
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+}
+/* 全球雷达卡：青绿主题 */
+:root[data-theme="light"] .rs-card--active {
+  background: linear-gradient(180deg, rgba(13, 148, 136, 0.05), #ffffff);
+  border-color: rgba(13, 148, 136, 0.3);
+}
+:root[data-theme="light"] .rs-card--active:hover { border-color: var(--teal); }
+/* 中国雷达卡：品牌红主题 */
+:root[data-theme="light"] .rs-card--china {
+  background: linear-gradient(180deg, rgba(192, 57, 43, 0.045), #ffffff);
+  border-color: rgba(192, 57, 43, 0.28);
+}
+:root[data-theme="light"] .rs-card--china:hover { border-color: #c0392b; }
+:root[data-theme="light"] .rs-card--soon {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+/* 状态徽章、标签 */
+:root[data-theme="light"] .rs-status {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--muted);
+}
+:root[data-theme="light"] .rs-status--live {
+  color: #0d7a6b;
+  border-color: rgba(13, 148, 136, 0.35);
+  background: rgba(13, 148, 136, 0.06);
+}
+:root[data-theme="light"] .rs-card--china .rs-status--live {
+  color: #c0392b;
+  border-color: rgba(192, 57, 43, 0.32);
+  background: rgba(192, 57, 43, 0.06);
+}
+:root[data-theme="light"] .rs-tag,
+:root[data-theme="light"] .rs-tags span {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--muted);
+}
+/* 雷达扫描动效：深色下的发光环在白底上要压淡，否则脏 */
+:root[data-theme="light"] .rs-ring {
+  border-color: rgba(13, 148, 136, 0.16);
+}
+:root[data-theme="light"] .rs-beam {
+  background: conic-gradient(from 0deg, rgba(13, 148, 136, 0.14), rgba(13, 148, 136, 0) 28%);
+}
+:root[data-theme="light"] .rs-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+:root[data-theme="light"] .rs-brand-mark {
+  background: rgba(13, 148, 136, 0.08);
+  border-color: rgba(13, 148, 136, 0.35);
+  color: #0d7a6b;
+}
+
+/* ============================================================
+   浅色主题：产业链雷达（chain.html）
+   chain-radar.css 里大量为黑底调的浅色调（#6fb7e8 天蓝、#e8a06f 浅橙、
+   #c3a6f5 浅紫等），白底下对比度仅 1.4~2.8，需整体压深。
+   涨跌语义保持：涨红、跌绿。
+   ============================================================ */
+:root[data-theme="light"] .cr-head-title .eyebrow,
+:root[data-theme="light"] .cr-pick.active b {
+  color: #1668bf;
+}
+:root[data-theme="light"] .cr-pick.active {
+  border-color: #1668bf;
+  background: rgba(22, 104, 191, 0.07);
+}
+:root[data-theme="light"] .cr-stat--lead > strong {
+  color: #b5670f;
+}
+/* 上中下游分层色条：白底下加深才看得出层级 */
+:root[data-theme="light"] .cr-layer.cr-up { border-left-color: #1668bf; }
+:root[data-theme="light"] .cr-layer.cr-mid { border-left-color: #c2740c; }
+:root[data-theme="light"] .cr-layer.cr-down { border-left-color: #0b8a5f; }
+/* 涨跌：色相不变，压深 */
+:root[data-theme="light"] .cr-stat > strong.up,
+:root[data-theme="light"] .cr-co.up .cr-co-q em {
+  color: #d3352a;
+}
+:root[data-theme="light"] .cr-stat > strong.down,
+:root[data-theme="light"] .cr-co.down .cr-co-q em {
+  color: #0b8a5f;
+}
+/* 企业阶段徽章 */
+:root[data-theme="light"] .cr-un.uni .cr-co-tag,
+:root[data-theme="light"] .cr-stat > strong.uni {
+  color: #6b3fc9;
+  background: rgba(107, 63, 201, 0.09);
+}
+:root[data-theme="light"] .cr-un.us .cr-co-tag {
+  color: #3949c0;
+  background: rgba(57, 73, 192, 0.09);
+}
+:root[data-theme="light"] .cr-un.ipo .cr-co-tag {
+  color: #b5780f;
+  background: rgba(181, 120, 15, 0.1);
+}
+:root[data-theme="light"] .cr-tierbadge,
+:root[data-theme="light"] .cr-intel-cue {
+  color: var(--muted);
+}
+:root[data-theme="light"] .cr-node,
+:root[data-theme="light"] .cr-co,
+:root[data-theme="light"] .cr-layer,
+:root[data-theme="light"] .cr-stat {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+/* 港股等未覆盖的企业标签 */
+:root[data-theme="light"] .cr-co-tag {
+  color: #1668bf;
+  background: rgba(22, 104, 191, 0.08);
+}
+:root[data-theme="light"] .cr-un.hk .cr-co-tag {
+  color: #1668bf;
+  background: rgba(22, 104, 191, 0.08);
+}

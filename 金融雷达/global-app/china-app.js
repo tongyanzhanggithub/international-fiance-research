@@ -698,7 +698,11 @@
     { sector: "AI · 多模态 / 视频生成", kw: "视频生成 大模型 融资", cos: [["生数科技","明星"],["爱诗科技","明星"],["智象未来","明星"],["潞晨科技","明星"],["Sand AI","早期"]] },
     { sector: "AI · Infra / 算力云", kw: "算力 大模型 融资", cos: [["无问芯穹","明星"],["硅基流动","明星"],["趋境科技","早期"],["清程极智","早期"]] },
     { sector: "AI · Agent / 应用", kw: "AI Agent 融资", cos: [["面壁智能","明星"],["蝴蝶效应","明星"],["澜舟科技","明星"],["澜码科技","早期"],["波形智能","早期"],["心识宇宙","早期"]] },
-    // ===== 物理AI 集群已升级为独立「物理AI产业链专区」（见 renderPhysAI）=====
+    // ===== 物理AI 集群（此处只收未上市初创；上市供应商见顶部「物理AI产业链专区」）=====
+    { sector: "物理AI · 具身大模型 VLA", kw: "具身智能 大模型 融资", cos: [["自变量机器人","明星"],["千寻智能","明星"],["穹彻智能","明星"],["星海图","明星"],["它石智航","早期"],["原力灵机","早期"],["光轮智能","明星"]] },
+    { sector: "物理AI · 人形机器人本体", kw: "人形机器人 融资", cos: [["宇树科技","拟IPO"],["智元机器人","独角兽"],["银河通用","独角兽"],["星动纪元","明星"],["逐际动力","明星"],["众擎机器人","早期"],["松延动力","早期"],["加速进化","早期"],["数字华夏","早期"]] },
+    { sector: "物理AI · 灵巧手 / 触觉传感", kw: "灵巧手 机器人 融资", cos: [["因时机器人","早期"],["帕西尼感知","明星"],["灵心巧手","早期"],["戴盟机器人","早期"],["钛深科技","早期"]] },
+    { sector: "物理AI · 四足 / 特种机器人", kw: "四足机器人 融资", cos: [["云深处科技","明星"],["宇树科技","拟IPO"],["蔚蓝智能","早期"]] },
     // ===== 其余硬科技 =====
     { sector: "AI算力芯片 · GPU", kw: "国产GPU 芯片 融资", cos: [["摩尔线程","拟IPO"],["沐曦","拟IPO"],["壁仞科技","独角兽"],["燧原科技","独角兽"],["天数智芯","独角兽"],["后摩智能","明星"],["爱芯元速","明星"],["芯动科技","明星"]] },
     { sector: "商业航天", kw: "商业航天 火箭 融资", cos: [["蓝箭航天","独角兽"],["天兵科技","独角兽"],["银河航天","独角兽"],["星际荣耀","明星"],["东方空间","明星"],["星河动力","明星"],["中科宇航","明星"]] },
@@ -707,8 +711,8 @@
     { sector: "固态电池", kw: "固态电池 融资", cos: [["卫蓝新能源","独角兽"],["清陶能源","独角兽"],["太蓝新能源","明星"],["恩力动力","明星"],["高能时代","明星"]] },
     { sector: "合成生物", kw: "合成生物 融资", cos: [["蓝晶微生物","明星"],["恩和生物","明星"],["微构工场","明星"],["态创生物","明星"],["引航生物","早期"]] },
     { sector: "量子科技", kw: "量子计算 融资", cos: [["本源量子","独角兽"],["国仪量子","明星"],["图灵量子","明星"],["玻色量子","早期"]] },
-    { sector: "自动驾驶 · 智驾", kw: "自动驾驶 融资", cos: [["文远知行","美股"],["小马智行","美股"],["Momenta","拟IPO"],["元戎启行","明星"],["轻舟智航","明星"],["卓驭科技","明星"]] },
-    { sector: "低空经济 · eVTOL", kw: "eVTOL 低空 融资", cos: [["亿航智能","美股"],["峰飞航空","独角兽"],["沃飞长空","明星"],["时的科技","明星"],["沃兰特","明星"],["御风未来","明星"]] },
+    { sector: "自动驾驶 · 智驾", kw: "自动驾驶 融资", cos: [["Momenta","拟IPO"],["元戎启行","明星"],["轻舟智航","明星"],["卓驭科技","明星"],["鉴智机器人","早期"],["千挂科技","早期"]] },
+    { sector: "低空经济 · eVTOL", kw: "eVTOL 低空 融资", cos: [["峰飞航空","独角兽"],["沃飞长空","明星"],["时的科技","明星"],["沃兰特","明星"],["御风未来","明星"],["零重力飞机","早期"]] },
   ];
   const HT_BADGE = { "独角兽": "uni", "拟IPO": "ipo", "明星": "star", "早期": "early", "国资": "soe", "美股": "list", "港股": "list", "已上市": "list" };
   const htNews = {};   // sector.kw -> 实时快讯
@@ -874,9 +878,9 @@
         </details>
       </section>
       <section class="ht-map">
-        <div class="ht-map-head"><h3>硬科技赛道图谱</h3><span>策展 · ${HARDTECH.reduce((n, s) => n + s.cos.length, 0)} 家明星初创 / 独角兽</span></div>
+        <div class="ht-map-head"><h3>硬科技赛道图谱 · 未上市初创</h3><span>策展 · ${HARDTECH.reduce((n, s) => n + s.cos.length, 0)} 家未上市初创 / 独角兽（已上市公司不收录，见产业链雷达）</span></div>
         <div class="ht-grid">${HARDTECH.map((s, i) => htCard(s, i)).join("")}</div>
-        <p class="ht-note">徽章：<i class="ht-badge ht-uni">独角兽</i> <i class="ht-badge ht-ipo">拟IPO</i> <i class="ht-badge ht-star">明星未上市</i> <i class="ht-badge ht-list">已上市</i> <i class="ht-badge ht-early">早期</i> <i class="ht-badge ht-soe">国资</i>。名单为策展，融资动态实时。</p>
+        <p class="ht-note">阶段徽章：<i class="ht-badge ht-uni">独角兽</i> <i class="ht-badge ht-ipo">拟IPO</i> <i class="ht-badge ht-star">明星未上市</i> <i class="ht-badge ht-early">早期</i> <i class="ht-badge ht-soe">国资</i>。<b>本图谱只收未上市公司</b>：已上市（含美股 / 港股 / A股）不在此列，请到产业链雷达看其实时行情。名单为策展，融资动态实时；纯早期新锐见「早期雷达」。</p>
       </section>
     </div>`;
   }
@@ -1299,7 +1303,19 @@
   let cnMap = null, geoLayer = null, selectedLayer = null, geoCache = null;
   const shortName = (f) => f.replace(/(维吾尔自治区|壮族自治区|回族自治区|特别行政区|自治区|省|市)$/, "");
   const heatFor = (f) => { const v = PROVINCE_HEAT[shortName(f)]; return typeof v === "number" ? v : null; };
+  const isLightTheme = () => document.documentElement.getAttribute("data-theme") === "light";
+  // 热力色阶：深色主题为「暗棕→红」；浅色主题必须反过来走「浅→深」，
+  // 否则低值的暗棕在白底上会比高值更抢眼，色阶语义颠倒。
   function heatColor(h) {
+    if (isLightTheme()) {
+      if (h == null) return "#e9eef4";
+      if (h >= 88) return "#d3352a";
+      if (h >= 74) return "#e4703f";
+      if (h >= 60) return "#ec9a4e";
+      if (h >= 48) return "#f5bb62";
+      if (h >= 36) return "#f3d9a8";
+      return "#fbecd2";
+    }
     if (h == null) return "#2a3233";
     if (h >= 88) return "#e5564a";
     if (h >= 74) return "#ef7a5f";
@@ -1308,7 +1324,18 @@
     if (h >= 36) return "#b5893c";
     return "#6d5c38";
   }
-  function geoStyle(feat) { const h = heatFor(feat.properties.name); return { color: "#0b0e0f", weight: 1, fillColor: heatColor(h), fillOpacity: h == null ? 0.3 : 0.82 }; }
+  // 省界描边：深色主题下原为 #0b0e0f，与背景同色 = 等于没有边界线，省份糊成一片，改用浅灰蓝；
+  // 浅色主题下用白色描边，衬得色块干净利落。
+  function geoStyle(feat) {
+    const h = heatFor(feat.properties.name);
+    const light = isLightTheme();
+    return {
+      color: light ? "#ffffff" : "#5b6b70",
+      weight: light ? 1 : 0.8,
+      fillColor: heatColor(h),
+      fillOpacity: h == null ? (light ? 0.9 : 0.35) : (light ? 0.95 : 0.85),
+    };
+  }
   // ---- 省份聚焦：悬停显示静态概览，点击拉取实时行情+实时快讯 ----
   const provStockCache = {}; // sn -> quotes（20s 内复用）
   const provNewsCache = {};  // sn -> items
