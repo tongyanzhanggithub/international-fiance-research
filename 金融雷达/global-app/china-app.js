@@ -495,10 +495,13 @@
   }
 
   // ---------------- 实时快讯 → 事件流 ----------------
+  // 分类顺序：政策 > 供应链 > 产业 > 市场（市场为兜底）
+  // 原产业词表过窄，大量 AI/大模型/算力/创新药/航天类快讯落进「市场」兜底，
+  // 导致分类分布失真（实测 17 条里 13 条被判为市场），此处按物理AI优先方针补全词表。
   function catFromText(t) {
-    if (/关税|管制|制裁|反倾销|反补贴|政策|监管|央行|证监会|发改委|商务部|部委|立法|规定/.test(t)) return { cat: "policy", catLabel: "政策" };
-    if (/供应链|港口|航运|运价|物流|海运/.test(t)) return { cat: "supply", catLabel: "供应链" };
-    if (/芯片|半导体|稀土|锂电|光伏|新能源|制造|产能|机器人|汽车|电池|产业|出口|外贸|东盟|一带一路|进出口|海关/.test(t)) return { cat: "industry", catLabel: "产业" };
+    if (/关税|管制|制裁|反倾销|反补贴|政策|监管|央行|证监会|发改委|工信部|商务部|财政部|国务院|部委|立法|规定|规划|试点|审批|牌照|标准|补贴|降准|降息|LPR/.test(t)) return { cat: "policy", catLabel: "政策" };
+    if (/供应链|港口|航运|运价|物流|海运|仓储|库存|断供|交付周期/.test(t)) return { cat: "supply", catLabel: "供应链" };
+    if (/芯片|半导体|集成电路|晶圆|光刻|存储|GPU|算力|数据中心|人工智能|大模型|智能体|具身|人形|机器人|灵巧手|减速器|稀土|永磁|锂电|光伏|新能源|储能|电池|汽车|制造|工业|产能|产业|出口|外贸|东盟|一带一路|进出口|海关|医药|创新药|生物|航天|卫星|低空|无人机|军工|材料|化工|钢铁|有色|电力|能源|农业|种业/.test(t)) return { cat: "industry", catLabel: "产业" };
     return { cat: "market", catLabel: "市场" };
   }
   function scoreFromText(t) {
@@ -594,6 +597,7 @@
         newsFailStreak = 0;
         renderEventList();
         renderDetail();
+        renderRiskSummary(); // 快讯到位后立刻更新「实时/演示」标签与热点统计
         if (state.activeTab === "policy") renderTabs();
         if (manual) toast(`已同步 ${events.length} 条实时快讯`);
         return;
@@ -663,7 +667,43 @@
       el("opp-note").textContent = `${best.chg >= 0 ? "+" : ""}${best.chg.toFixed(2)}% · 实时领涨`;
     }
 
-    el("risk-overview-summary").textContent = `${events.length} 条中国产业与政策事件纳入当前范围，重点集中在新能源出海、稀土管制与半导体自主。`;
+    renderRiskSummary();
+  }
+
+  // 概览文案：全部由真实事件推导。
+  // 原文案「重点集中在新能源出海、稀土管制与半导体自主」是硬编码的，
+  // 与实际抓到的快讯无关，属于给真实数据套上虚假结论，已改为实时统计 + 真实热点提炼。
+  const THEME_RULES = [
+    ["物理AI·具身智能", /具身|人形|机器人|灵巧手|减速器|丝杠|谐波/],
+    ["半导体·芯片", /芯片|半导体|晶圆|光刻|制程|存储|GPU|算力/],
+    ["AI·大模型", /大模型|人工智能|智能体|算法|AI/],
+    ["新能源·出海", /新能源|光伏|锂电|储能|电池|电动车|出海/],
+    ["稀土·关键材料", /稀土|永磁|关键矿产|镓|锗|石墨/],
+    ["贸易摩擦", /关税|反倾销|反补贴|出口管制|制裁|CBAM|贸易/],
+    ["低空·商业航天", /低空|eVTOL|无人机|卫星|火箭|航天/],
+    ["资本市场", /A股|港股|北向|IPO|指数|融资/],
+  ];
+  function topThemes(list, n) {
+    return THEME_RULES
+      .map(([name, re]) => [name, list.filter((e) => re.test(e.title || "")).length])
+      .filter(([, c]) => c > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, n || 3)
+      .map(([name, c]) => `${name} ${c} 条`);
+  }
+  function renderRiskSummary() {
+    const live = newsMode === "live";
+    const label = el("risk-period-label");
+    if (label) label.textContent = live ? "CHINA RISK PULSE · 实时快讯" : "CHINA RISK PULSE · 演示数据";
+    const n = (c) => events.filter((e) => e.cat === c).length;
+    const themes = topThemes(events, 3);
+    const parts = [
+      `${events.length} 条${live ? "实时" : "演示"}快讯`,
+      `政策 ${n("policy")} · 产业 ${n("industry")} · 供应链 ${n("supply")} · 市场 ${n("market")}`,
+    ];
+    if (themes.length) parts.push(`当前热点：${themes.join("、")}`);
+    const box = el("risk-overview-summary");
+    if (box) box.textContent = parts.join(" ｜ ");
   }
 
   // ---------------- 关键信号 ----------------

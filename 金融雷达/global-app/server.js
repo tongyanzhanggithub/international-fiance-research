@@ -664,18 +664,58 @@ async function loadCnNews() {
   });
   // 中文事件流：过滤纯外文/过短条目（标题需含足够中文）
   all = all.filter((x) => x.title && x.title.length > 3 && (x.title.match(/[一-鿿]/g) || []).length >= 2);
-  // 标题归一化去重（去标点空白）
+  // 清洗来源样板前缀：「金十数据7月20日讯，」「财联社7月20日电，」这类占掉大量标题空间
+  const stripPrefix = (t) => String(t || "")
+    .replace(/^(金十数据|财联社|每经|每日经济新闻|证券时报|上证报|中证报|新华财经|智通财经|格隆汇|同花顺|东方财富)?\s*\d{1,2}月\d{1,2}日\s*(讯|电|报道)?[，,：:]\s*/, "")
+    .replace(/^(金十数据|财联社|每经|证券时报|上证报|智通财经|格隆汇)\s*[讯电][，,：:]\s*/, "")
+    .trim();
+  all.forEach((x) => { const s = stripPrefix(x.title); if (s.length >= 6) x.title = s; });
+
+  // 去重：先按归一化标题，再按「主体 + 动作」合并同一事件的多源报道
+  // （实测三峡能源增持、红塔证券回购各被两个源以不同措辞报道，仅按标题无法去重）
+  const ACTIONS = ["增持", "减持", "回购", "中标", "签约", "融资", "并购", "重组", "上市", "IPO", "业绩", "公告", "涨停", "跌停", "定增", "分红"];
+  const subjectOf = (t) => {
+    const m = String(t).match(/^([一-龥A-Za-z0-9]{2,8}?)(?=[：:，,]|股份|集团|科技|能源|证券|银行|公司)/);
+    return m ? m[1] : String(t).slice(0, 6);
+  };
   const seen = new Set();
+  const seenEvent = new Set();
   const dedup = [];
   for (const x of all) {
     const key = x.title.replace(/[\s，。、！？：；""''（）()【】\[\]—\-.,!?:;]/g, "");
     if (seen.has(key)) continue;
+    const act = ACTIONS.find((a) => x.title.includes(a));
+    if (act) {
+      const evKey = `${subjectOf(x.title)}|${act}`;
+      if (seenEvent.has(evKey)) continue; // 同一主体同一动作，只留最新的一条
+      seenEvent.add(evKey);
+    }
     seen.add(key);
     dedup.push(x);
   }
   dedup.sort((a, b) => (b.ts || 0) - (a.ts || 0));
   if (!dedup.length) throw new Error("所有快讯源暂不可用");
-  const out = dedup.slice(0, 30);
+  // 产业金融相关性过滤：这些源里混有旅游/美食/体育/民生等与产业金融无关的条目
+  // （实测 30 条里有「村里种出外星水果」「户外挑战赛冠军」这类），
+  // 而本雷达对外声称是「中国产业与政策事件」，必须先筛掉不相关内容。
+  const RELEVANT = /股|证券|基金|债|期货|外汇|汇率|人民币|央行|利率|降准|降息|LPR|银行|保险|信托|IPO|上市|融资|并购|重组|减持|增持|回购|业绩|财报|营收|净利|订单|中标|签约|估值|市值|指数|板块|涨|跌|经济|GDP|CPI|PPI|PMI|进出口|外贸|海关|顺差|逆差|投资|消费|财政|税|关税|产业|制造|工业|供应链|产能|芯片|半导体|集成电路|新能源|光伏|锂电|储能|电池|汽车|机器人|具身|人形|人工智能|大模型|算力|数据中心|稀土|材料|化工|钢铁|有色|煤炭|电力|能源|医药|生物|创新药|航天|卫星|低空|无人机|军工|农业|种业|政策|监管|发改委|工信部|商务部|证监会|财政部|国务院|部委|规划|试点|管制|制裁|反倾销|反补贴|标准|牌照|审批/;
+  // 只按标题判定：摘要里常含泛财经词，会把无关标题一起带进来（实测「外星水果」「户外挑战赛」即由此漏网）
+  const IRRELEVANT = /旅游|景区|门票|美食|菜谱|水果|采摘|挑战赛|冠军|赛事|球|演唱会|电影|影片|明星|综艺|娱乐|星座|运势|天气|路况|寻人|相亲|婚恋|养生|减肥|宠物|乡土|致富|扶贫|振兴|文旅|非遗|民宿/;
+  // 军事/地缘冲突：会被「无人机」「卫星」等产业词误命中（实测「科威特军方拦截伊朗无人机」漏网）
+  const MILITARY = /军方|拦截|导弹|空袭|袭击|开火|交火|战争|停火|武装|敌对|部队|战机/;
+  // 境外本地新闻：与中国产业金融无关的外国国内事件；含中国相关词则保留（如中韩贸易、SK海力士供货中国）
+  const FOREIGN_LOCAL = /科威特|伊朗|以色列|巴基斯坦|印度|土耳其|埃及|尼日利亚|阿根廷|巴西|墨西哥|南非/;
+  const CHINA_LINK = /中国|中方|我国|内地|大陆|A股|沪|深|港股|人民币|央行|国务院|商务部|海关|出口|进口|对华|中美|中欧|中日|中韩/;
+  let relevant = dedup.filter((x) => {
+    const t = x.title || "";
+    if (!RELEVANT.test(t) || IRRELEVANT.test(t)) return false;
+    if (MILITARY.test(t)) return false;
+    if (FOREIGN_LOCAL.test(t) && !CHINA_LINK.test(t)) return false; // 外国本地事件且与中国无关联
+    return true;
+  });
+  // 健壮性兜底：若过滤后条目过少（源异常或口径过严），退回未过滤列表，宁可多也不空
+  if (relevant.length < 8) relevant = dedup;
+  const out = relevant.slice(0, 30);
   try { archive.record(out.map((x) => ({ ...x, time: x.time || (x.ts ? new Date(x.ts).toISOString() : "") })), { kind: "news" }); } catch (e) { /* 存档失败不影响主流程 */ }
   return out;
 }
